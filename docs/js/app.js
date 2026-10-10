@@ -1,89 +1,78 @@
 import * as store from "./store.js";
 import { KINDS, inspectFile, sha256, validateParameters, crossCheck, decodeText, parseCSV, ValidationError } from "./validate.js";
 import { computeEstimation } from "./compute.js";
+import { $, esc, chf, pct, num, toast, busy, openDialog, closeDialog, ask } from "./ui.js";
+import { CATEGORIES, breakdown } from "./categories.js";
+import { initParamsPage, showParamsPage, confirmLeave, isDirty } from "./params-page.js";
+import { initSummaryPage, showSummaryPage } from "./summary-page.js";
 
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const chf = (v) => (v == null || Number.isNaN(+v) ? "–" : (+v).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-const LAST_PROJECT_KEY = "tender.lastProject";
+const LAST_PROJECT_KEY = "bidwise.lastProject";
 
 const state = {
   user: null,
   defaults: null,
   project: null,
-  latest: null,          // latest version document
-  localBlobs: {},        // files picked in this browser session: {kind: {sha256, blob}}
+  latest: null,     // latest version document
+  localBlobs: {},   // files picked in this browser session: {kind: {sha256, blob}}
 };
 
-// ---- small UI helpers -------------------------------------------------------------
+const ctx = { state, store, reload: () => reload(), go: (p) => go(p) };
+initParamsPage(ctx);
+initSummaryPage(ctx);
 
-let toastTimer;
-function toast(msg, isError = false) {
-  const t = $("toast");
-  t.textContent = msg;
-  t.className = isError ? "error" : "";
-  t.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.hidden = true), isError ? 9000 : 4000);
-}
+// ---- pages (#/ , #/parameters , #/summary) -----------------------------------------
 
-async function busy(fn) {
-  $("busy").hidden = false;
-  try { return await fn(); }
-  catch (e) { if (!(e instanceof ValidationError)) console.error(e); toast(e.message || String(e), true); }
-  finally { $("busy").hidden = true; }
-}
+const PAGES = { "": "dashboard", parameters: "params", summary: "summary" };
+let currentPage = "dashboard";
+let ignoreHash = false;
 
-function openDialog(title, bodyHtml, buttons = []) {
-  const dlg = $("dlg");
-  $("dlgTitle").textContent = title;
-  $("dlgBody").innerHTML = bodyHtml;
-  const foot = $("dlgFoot");
-  foot.innerHTML = "";
-  foot.hidden = !buttons.length;
-  for (const b of buttons) {
-    const el = document.createElement("button");
-    el.className = `btn ${b.cls || "grey"}`;
-    el.textContent = b.label;
-    el.onclick = b.onClick;
-    foot.appendChild(el);
+const go = (name) => { location.hash = name ? `#/${name}` : "#/"; };
+
+window.addEventListener("hashchange", async () => {
+  if (ignoreHash) { ignoreHash = false; return; }
+  if (currentPage === "params" && isDirty() && !(await confirmLeave())) {
+    ignoreHash = true;
+    location.hash = "#/parameters";
+    return;
   }
-  if (!dlg.open) dlg.showModal();
-  return dlg;
-}
-const closeDialog = () => $("dlg").close();
-$("dlg").addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeDialog(); });
+  showPage();
+});
 
-function ask(title, value = "") {
-  return new Promise((resolve) => {
-    openDialog(title, `<div class="ask"><input id="askInput" value="${esc(value)}"></div>`, [
-      { label: "Cancel", cls: "ghost", onClick: () => { closeDialog(); resolve(null); } },
-      { label: "OK", cls: "navy", onClick: () => { const v = $("askInput").value.trim(); closeDialog(); resolve(v); } },
-    ]);
-    $("dlg").addEventListener("close", () => resolve(null), { once: true });   // closed with × or Esc
-    const input = $("askInput");
-    input.focus(); input.select();
-    input.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); $("dlgFoot").lastChild.click(); } };
-  });
+function showPage() {
+  const page = PAGES[location.hash.replace(/^#\/?/, "")] || "dashboard";
+  if (!state.project) return;
+  currentPage = page;
+  document.body.dataset.page = page;
+  for (const p of ["dashboard", "params", "summary"]) $(`page-${p}`).hidden = p !== page;
+  window.scrollTo(0, 0);
+  if (page === "params") showParamsPage();
+  if (page === "summary") busy(showSummaryPage);
 }
 
-// ---- auth ---------------------------------------------------------------------------
+$("backBtn").onclick = () => go("");
+
+// ---- auth ------------------------------------------------------------------------------
 
 $("loginBtn").onclick = () => busy(store.signIn);
-$("logoutBtn").onclick = () => busy(store.logOut);
+$("logoutBtn").onclick = async () => {
+  if (currentPage === "params" && !(await confirmLeave())) return;
+  busy(store.logOut);
+};
 
 store.onUser((user) => busy(async () => {
   state.user = user;
   $("loginView").hidden = !!user;
-  $("mainView").hidden = !user;
   $("signedInHeader").hidden = !user;
-  if (!user) { state.project = null; return; }
-
-  const name = user.displayName || user.email;
-  $("userName").textContent = (name || "").split(" ")[0];
+  if (!user) {
+    state.project = null;
+    for (const p of ["dashboard", "params", "summary"]) $(`page-${p}`).hidden = true;
+    return;
+  }
+  const name = user.displayName || user.email || "?";
+  $("userName").textContent = name.split(" ")[0];
   $("avatar").innerHTML = user.photoURL
-    ? `<img class="avatar" src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`
-    : esc((name || "?")[0].toUpperCase());
+    ? `<img src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`
+    : esc(name[0].toUpperCase());
 
   await store.saveProfile(user);
   state.defaults ??= await (await fetch("defaults/project_parameters.json")).json();
@@ -96,12 +85,13 @@ store.onUser((user) => busy(async () => {
   await openProject(pid);
 }));
 
-// ---- projects -----------------------------------------------------------------------
+// ---- projects ----------------------------------------------------------------------------
 
 async function openProject(pid) {
   state.localBlobs = {};
   try { localStorage.setItem(LAST_PROJECT_KEY, pid); } catch {}
   await reload(pid);
+  showPage();
 }
 
 async function reload(pid = state.project?.id) {
@@ -109,12 +99,12 @@ async function reload(pid = state.project?.id) {
   state.latest = state.project.currentVersion
     ? await store.getVersion(state.user.uid, pid, state.project.currentVersion)
     : null;
-  render();
+  renderDashboard();
 }
 
 $("newBtn").onclick = async () => {
   const name = await ask("New project name");
-  if (name) busy(async () => openProject((await store.createProject(state.user, name, state.defaults)).id));
+  if (name) busy(async () => { go(""); await openProject((await store.createProject(state.user, name, state.defaults)).id); });
 };
 
 $("renameBtn").onclick = async () => {
@@ -141,8 +131,10 @@ $("saveBtn").onclick = () => busy(async () => {
 });
 
 $("pdfBtn").onclick = () => window.print();
+$("paramsBtn").onclick = () => go("parameters");
+$("summaryBtn").onclick = () => go("summary");
 
-// ---- uploads ------------------------------------------------------------------------
+// ---- uploads ------------------------------------------------------------------------------
 
 let pendingKind = null;
 document.querySelectorAll("[data-upload]").forEach((btn) => {
@@ -160,79 +152,16 @@ $("filePicker").onchange = (e) => {
   const kind = pendingKind;
   if (!file || !kind) return;
   busy(async () => {
-    const checked = await inspectFile(kind, file);   // throws ValidationError with a clear message
+    const checked = await inspectFile(kind, file);
     const hash = await sha256(checked.buffer);
     const rec = await store.uploadWorkingFile(state.user, state.project.id, kind, file, checked, hash);
     state.localBlobs[kind] = { sha256: hash, blob: file };
     await reload();
     toast(`Uploaded ${rec.filename}${rec.rows ? ` (${rec.rows} rows)` : ""}`);
-  });
+  }, [ValidationError]);
 };
 
-// ---- parameters editor --------------------------------------------------------------
-
-function fieldsHtml(obj, path = []) {
-  return Object.entries(obj).map(([key, val]) => {
-    const p = [...path, key].join(".");
-    const label = esc(key.replace(/_/g, " "));
-    if (val && typeof val === "object" && !Array.isArray(val)) {
-      return `<fieldset><legend>${label}</legend>${fieldsHtml(val, [...path, key])}</fieldset>`;
-    }
-    if (typeof val === "boolean") {
-      return `<div class="field"><label>${label}</label><input type="checkbox" data-path="${p}" data-type="boolean" ${val ? "checked" : ""}></div>`;
-    }
-    if (typeof val === "number") {
-      return `<div class="field"><label>${label}</label><input type="number" step="any" data-path="${p}" data-type="number" value="${val}"></div>`;
-    }
-    if (Array.isArray(val)) {
-      return `<div class="field"><label>${label} <small>(comma separated)</small></label><input type="text" data-path="${p}" data-type="array" value="${esc(val.join(", "))}"></div>`;
-    }
-    return `<div class="field"><label>${label}</label><input type="text" data-path="${p}" data-type="${val === null ? "nullable" : "string"}" value="${esc(val ?? "")}"></div>`;
-  }).join("");
-}
-
-function readFields(container, original) {
-  const out = structuredClone(original);
-  container.querySelectorAll("[data-path]").forEach((el) => {
-    const keys = el.dataset.path.split(".");
-    let target = out;
-    keys.slice(0, -1).forEach((k) => (target = target[k]));
-    const last = keys.at(-1);
-    switch (el.dataset.type) {
-      case "boolean": target[last] = el.checked; break;
-      case "number": target[last] = el.value === "" ? NaN : Number(el.value); break;
-      case "array": target[last] = el.value.split(",").map((s) => s.trim()).filter(Boolean); break;
-      case "nullable": target[last] = el.value.trim() || null; break;
-      default: target[last] = el.value;
-    }
-  });
-  return out;
-}
-
-$("paramsBtn").onclick = () => {
-  const params = state.project.parameters;
-  openDialog("Edit parameters", `<div id="paramErrors" class="errors"></div><div id="paramForm">${fieldsHtml(params)}</div>`, [
-    { label: "Reset to defaults", cls: "ghost", onClick: () => {
-        const d = structuredClone(state.defaults);
-        d.project = { ...d.project, name: params.project.name, source_tender_file: params.project.source_tender_file };
-        $("paramForm").innerHTML = fieldsHtml(d);
-      } },
-    { label: "Cancel", cls: "ghost", onClick: closeDialog },
-    { label: "Save parameters", cls: "navy", onClick: () => {
-        const updated = readFields($("paramForm"), params);
-        const errors = validateParameters(updated);
-        if (errors.length) { $("paramErrors").textContent = errors.join("\n"); $("dlgBody").scrollTop = 0; return; }
-        busy(async () => {
-          await store.saveParameters(state.user, state.project.id, updated);
-          closeDialog();
-          await reload();
-          toast("Parameters saved. Click Re-compute to store them as a new version.");
-        });
-      } },
-  ]);
-};
-
-// ---- re-compute & versions ----------------------------------------------------------
+// ---- re-compute & version history ------------------------------------------------------------
 
 $("recomputeBtn").onclick = async () => {
   const errors = validateParameters(state.project.parameters);
@@ -241,9 +170,9 @@ $("recomputeBtn").onclick = async () => {
   if (missing.length) return toast(`Upload these files first: ${missing.join(", ")}`, true);
 
   const note = await ask("Note for this version (optional)", "");
-  if (note === null) return;   // cancelled
+  if (note === null) return;
   busy(async () => {
-    let parsed = {};
+    const parsed = {};
     const prepare = async (blobs, parameters) => {
       for (const kind of ["catalog", "productivity"]) {
         parsed[kind] = parseCSV(decodeText(await blobs[kind].arrayBuffer()).text).rows;
@@ -261,22 +190,21 @@ $("recomputeBtn").onclick = async () => {
   });
 };
 
-$("historyBtn").onclick = () => busy(showHistory);
-
-async function showHistory() {
+$("historyBtn").onclick = () => busy(async () => {
   const versions = await store.listVersions(state.user.uid, state.project.id);
   const rows = versions.map((v) => {
     const files = v.files
       ? KINDS.map((k) => `<a href="#" data-path="${esc(v.files[k].storagePath)}">${esc(v.files[k].filename)}</a>${v.changedSincePrevious?.[k] ? ' <span class="tag">changed</span>' : ""}`).join("<br>")
-      : `<span class="errors">${esc(v.error || "")}</span>`;
+        + `<br><a href="#" data-path="${esc(v.parametersPath)}">project_parameters.json</a>${v.changedSincePrevious?.parameters ? ' <span class="tag">changed</span>' : ""}`
+      : `<span style="color:var(--danger)">${esc(v.error || "")}</span>`;
     const status = { saved: "ok", computed: "ok", failed: "bad", compute_failed: "bad" }[v.status] || "";
     return `<tr>
       <td><b>${v.version}</b></td>
       <td>${new Date(v.createdAt).toLocaleString()}<br><small>${esc(v.createdBy?.name || v.createdBy?.email || "")}</small></td>
-      <td>${files}${v.files ? `<br><a href="#" data-path="${esc(v.parametersPath)}">project_parameters.json</a>${v.changedSincePrevious?.parameters ? ' <span class="tag">changed</span>' : ""}` : ""}</td>
+      <td>${files}</td>
       <td>${esc(v.note || "")}</td>
       <td><span class="tag ${status}">${esc(v.status)}</span></td>
-      <td>${v.files ? `<button class="btn ghost" data-restore="${v.version}" style="font-size:13px">Restore</button>` : ""}</td>
+      <td>${v.files ? `<button class="btn ghost small" data-restore="${v.version}">Restore</button>` : ""}</td>
     </tr>`;
   }).join("");
   openDialog("Version history", versions.length
@@ -301,45 +229,47 @@ async function showHistory() {
       });
     }
   };
+});
+
+// ---- dashboard rendering ----------------------------------------------------------------------
+
+function donutSvg(b) {
+  const W = 420, H = 380, cx = W / 2, cy = H / 2, r = 112, sw = 40;
+  const C = 2 * Math.PI * r;
+  let parts = "", labels = "", start = 0;
+  if (b.share) {
+    const total = CATEGORIES.reduce((s, c) => s + (b.share[c.key] || 0), 0) || 1;
+    for (const c of CATEGORIES) {
+      const v = (b.share[c.key] || 0) / total;
+      if (v <= 0) continue;
+      parts += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.color}" stroke-width="${sw}"
+        stroke-dasharray="${v * C} ${C}" transform="rotate(${-90 + start * 360} ${cx} ${cy})"><title>${c.label}: ${pct(b.share[c.key])}</title></circle>`;
+      const mid = (start + v / 2) * 2 * Math.PI - Math.PI / 2;
+      const lx = cx + Math.cos(mid) * (r + sw / 2 + 14), ly = cy + Math.sin(mid) * (r + sw / 2 + 14);
+      const anchor = Math.cos(mid) > 0.25 ? "start" : Math.cos(mid) < -0.25 ? "end" : "middle";
+      const words = c.label.split(" ");
+      const lines = c.label.length > 14 && words.length > 1 ? [words.slice(0, Math.ceil(words.length / 2)).join(" "), words.slice(Math.ceil(words.length / 2)).join(" ")] : [c.label];
+      const y0 = ly - ((lines.length) * 11) / 2 + (Math.sin(mid) > 0.3 ? 8 : Math.sin(mid) < -0.3 ? -4 : 2);
+      labels += `<text class="seg-label" text-anchor="${anchor}">${lines.concat(pct(b.share[c.key])).map((t, i) =>
+        `<tspan x="${lx}" y="${y0 + i * 11}">${esc(t)}</tspan>`).join("")}</text>`;
+      start += v;
+    }
+  } else {
+    parts = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e0e0e0" stroke-width="${sw}"/>`;
+  }
+  const center = `
+    <g transform="translate(${cx - 13} ${cy - 76})" fill="none" stroke="#4f9e6b" stroke-width="2.6" stroke-linecap="round">
+      <circle cx="13" cy="13" r="12"/><path d="M7 13.5l4 4 9-10"/></g>
+    <text class="center-title" x="${cx}" y="${cy - 28}" text-anchor="middle">Calculated:</text>
+    <text class="center-val" x="${cx}" y="${cy - 7}" text-anchor="middle">${pct(b.calculated, 0)}</text>
+    <g transform="translate(${cx - 14} ${cy + 5})" fill="none" stroke="#c95c4a" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M14 2L27 25H1z"/><path d="M14 10v7M14 21v.5" stroke-linecap="round"/></g>
+    <text class="center-title" x="${cx}" y="${cy + 52}" text-anchor="middle">Manual review:</text>
+    <text class="center-val" x="${cx}" y="${cy + 73}" text-anchor="middle">${pct(b.manual, 0)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Position status breakdown">${parts}${labels}${center}</svg>`;
 }
 
-$("summaryBtn").onclick = () => {
-  const r = state.latest?.results;
-  if (!r?.position_results?.length) return toast("No calculated results yet for this version.");
-  const rows = r.position_results.map((p) => `<tr><td>${esc(p.lv_id)}</td><td>${esc(p.matched_product_id)}</td>
-    <td>${p.quantity} ${esc(p.unit)}</td><td>${chf(p.material_cost_chf)}</td><td>${chf(p.labour_cost_chf)}</td>
-    <td>${chf(p.direct_position_cost_chf)}</td><td>${esc(p.status)}</td></tr>`).join("");
-  openDialog(`Detailed summary – version ${state.latest.version}`,
-    `<table><thead><tr><th>LV</th><th>Product</th><th>Qty</th><th>Material</th><th>Labour</th><th>Direct</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`);
-};
-
-// ---- dashboard rendering --------------------------------------------------------------
-
-function donut(pct, label) {
-  const r = 50, c = 2 * Math.PI * r;
-  const v = pct == null ? 0 : Math.max(0, Math.min(100, pct));
-  return `<div class="donut">
-    <svg viewBox="0 0 120 120">
-      <circle cx="60" cy="60" r="${r}" fill="none" stroke="#e0e0e0" stroke-width="12"/>
-      ${v > 0 ? `<circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--green)" stroke-width="12" stroke-linecap="round"
-        stroke-dasharray="${(v / 100) * c} ${c}" transform="rotate(-90 60 60)"/>` : ""}
-      <text x="60" y="68" text-anchor="middle" class="val">${pct == null ? "–" : Math.round(pct) + "%"}</text>
-    </svg><p>${label}</p></div>`;
-}
-
-function kpis(results) {
-  const k = results?.kpis || {};
-  const pos = results?.position_results || [];
-  const share = (fn) => (pos.length ? (100 * pos.filter(fn).length) / pos.length : null);
-  return {
-    found: k.recommendations_found_pct ?? share((p) => !!p.matched_product_id),
-    supplier: k.supplier_quote_needed_pct ?? share((p) => p.status === "supplier_quote_required"),
-    manual: k.manual_review_required_pct ?? share((p) => !!p.review_required),
-    variable: k.variable_costs_estimated_pct ?? null,
-  };
-}
-
-function render() {
+function renderDashboard() {
   const p = state.project;
   $("projectName").textContent = p.name;
   $("projectName").title = p.name;
@@ -353,9 +283,10 @@ function render() {
   }
 
   const results = state.latest?.results;
-  const k = kpis(results);
-  $("donuts").innerHTML = donut(k.found, "Recommendations found") + donut(k.supplier, "Supplier quote needed")
-    + donut(k.manual, "Manual review required") + donut(k.variable, "Variable costs estimated");
+  const b = breakdown(results);
+  $("chart").innerHTML = donutSvg(b);
+  $("priceable").textContent = b.priceable == null ? "–" : num(b.priceable, 0);
+  $("materials").textContent = b.materials == null ? "–" : num(b.materials, 0);
 
   const s = results?.example_subset_summary || results?.summary || {};
   $("costs").innerHTML = [
@@ -363,12 +294,14 @@ function render() {
     ["Direct", s.direct_cost_chf], ["Baseline", s.cost_baseline_chf],
   ].map(([l, v]) => `<dt>${l}: CHF</dt><dd>${chf(v)}</dd>`).join("");
 
+  const sb = p.parameters.stretch_bid_optimization || {};
   const scenarios = results?.recommended_bid_range?.scenarios
-    || (p.parameters.stretch_bid_optimization?.scenario_names || ["Aggressive", "Target", "Conservative"]).map((n) => ({ scenario: n }));
-  const colors = ["var(--green-strong)", "var(--green-light)", "var(--amber)"];
+    || (sb.scenario_names || ["Aggressive", "Target", "Conservative"]).map((n) => ({ scenario: n }));
+  const colors = ["var(--win-1)", "var(--win-2)", "var(--win-3)"];
+  $("bids").style.setProperty("--bid-cols", Math.min(scenarios.length, 4));
   $("bids").innerHTML = scenarios.map((sc, i) => {
     const prob = sc.estimated_win_probability;
-    const margin = sc.margin_pct ?? p.parameters.stretch_bid_optimization?.scenario_margins_pct?.[sc.scenario];
+    const margin = sc.margin_pct ?? sb.scenario_margins_pct?.[sc.scenario];
     return `<div class="bid"><h3>${esc(sc.scenario)} Bid</h3><dl>
       <dt>Bid Price</dt><dd>${sc.bid_price_chf != null ? chf(sc.bid_price_chf) + " CHF" : "–"}</dd>
       <dt>Margin</dt><dd>${margin != null ? margin.toLocaleString("de-DE", { minimumFractionDigits: 1 }) + " %" : "–"}</dd>
@@ -377,7 +310,7 @@ function render() {
         : "–"}</dd>
       <dt>Contribution</dt><dd>${sc.expected_contribution_chf != null ? chf(sc.expected_contribution_chf) + " CHF" : "–"}</dd>
     </dl></div>`;
-  }).join("") + (results ? "" : `<p class="no-results">${p.currentVersion
+  }).join("") + (results ? "" : `<p class="hint">${p.currentVersion
     ? `Version ${p.currentVersion} is saved. Results appear here once a calculation is added in js/compute.js.`
     : "Upload the tender, catalog and productivity files, then click Re-compute."}</p>`);
 }

@@ -58,7 +58,13 @@ The page must be opened through a small local web server, not by double-clicking
 
 The values in `firebase-config.js` are safe to publish. Your data is protected by the rules from step 1, which only let each signed-in user read and write their own files.
 
-## 5. Where to change things
+## 5. The three pages
+
+- **Dashboard:** uploads, version, the status donut, counts, cost estimation and bid cards.
+- **Edit parameters** (`#/parameters`): every parameter in editable cards. Use the **+** row at the bottom of a card to add your own parameter. Choose the unit (%, CHF, h, CHF/h or ×); the stored key gets a matching suffix, for example `risk_surcharge_pct`. In **Bid scenarios** you can add a scenario with its margin %; each scenario becomes a bid card. Custom entries can be removed with ×. **Save** stores the changes, and the next **Re-compute** freezes them into a version. You're asked before leaving with unsaved changes.
+- **Detailed summary** (`#/summary`): pick a version. It shows totals, a breakdown by status, a searchable and sortable table of all positions with a totals row, and an **Export CSV** button that produces Excel-friendly output (`;` and decimal comma).
+
+## 6. Where to change things
 
 | What | File |
 |---|---|
@@ -66,7 +72,8 @@ The values in `firebase-config.js` are safe to publish. Your data is protected b
 | Default parameters for new projects | `defaults/project_parameters.json` |
 | Required CSV columns, parameter checks | `js/validate.js` |
 | **Your calculation** (fills the dashboard) | `js/compute.js` |
-| Logo | put a file at `assets/logo.png` |
+| Logo | `assets/logo.png` |
+| Status categories and colours (donut, summary) | `js/categories.js` |
 | Layout and colours | `index.html` |
 
 `computeEstimation()` in `js/compute.js` receives the parameters, the CSV rows and the tender PDF. Return an object shaped like `sample_data/expected_output_example.json`. It is saved as `results.json` in the version folder, and the donuts, cost box and bid cards fill in automatically.

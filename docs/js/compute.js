@@ -14,6 +14,16 @@
 // It is saved as results.json in the version folder and shown on the dashboard.
 // Return null to only save the inputs (the dashboard then shows "–").
 //
+// Dashboard donut + detailed summary group positions by `status` (see js/categories.js):
+//   "calculated" (split into Perfectly Matched / Assumption applied by match_confidence >= 0.9),
+//   "assumption_applied", "supplier_quote_required", "review_required",
+//   "insufficient_information", "non_priceable".
+// Optional overrides in results.kpis: position_breakdown_pct, calculated_pct, manual_review_pct,
+//   priceable_positions, materials_found.
+//
+// Parameters you add yourself on the Edit parameters page are in inputs.parameters as well
+// (their paths are listed in inputs.parameters.custom_parameters, e.g. "allowances.risk_pct").
+//
 // Tip (checked against the example output): for a position,
 //   adjusted_install_hours = quantity * base_hours_per_unit
 //                            * product(factors in factor_keys except site_efficiency) / site_efficiency
