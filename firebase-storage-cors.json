@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:5500", "https://dhinu78.github.io"],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type", "Content-Length", "Content-Disposition"],
+    "maxAgeSeconds": 3600
+  }
+]

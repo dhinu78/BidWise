@@ -1,0 +1,80 @@
+BIDWISE - what the backend needs to do
+=======================================
+
+The BIDWISE web app (GitHub Pages) handles login, projects and file storage (Firebase). The
+backend has nothing to do with Firebase: it only receives files over HTTP, runs your script and
+answers with JSON. No login, no database.
+
+1. When the user clicks Compute, the app sends:
+
+   POST {your URL}/v1/estimates          (multipart/form-data, no special headers)
+
+   Five parts, all sent as files:
+     tender        the tender PDF
+     catalog       catalog.csv
+     productivity  productivity.csv
+     parameters    project_parameters.json (the values from the "Edit parameters" page)
+     meta          meta.json, e.g. {"project_id": "a1b2c3", "version": 3, "tender_file": "BKP_244.pdf"}
+
+2. You answer in one of two ways:
+
+   a) Finished quickly (under ~1 minute):
+      200  {"parameters": {...}, "output": {...}}
+
+   b) Takes longer (recommended):
+      202  {"job_id": "abc123"}
+      The app then calls every 2 seconds:
+      GET {your URL}/v1/estimates/abc123
+      and you answer 200 with one of:
+        {"status": "running", "progress": 0.4, "message": "Matching positions"}
+        {"status": "done", "result": {"parameters": {...}, "output": {...}}}
+        {"status": "failed", "error": "what went wrong"}
+      "progress" (0..1) and "message" are optional; the user sees them under the spinner.
+      The app gives up after 20 minutes.
+
+   Errors: any 4xx/5xx with {"error": "..."} - the text is shown to the user.
+
+3. What to return:
+
+   "parameters" = the full, updated project_parameters.json. It replaces what the user sees on
+   "Edit parameters". New keys are fine. Send null if nothing changed.
+
+   "output" = your output file, exactly like priced_output.json. The dashboard and the detailed
+   summary show it as-is; the app recalculates nothing. Required: position_results,
+   example_subset_summary (or "summary") and recommended_bid_range.scenarios. Every position
+   needs a unique lv_id and its source_page. Everything else you already produce (price_flag,
+   status_reason, price_range_chf, estimate, alternatives, cost_summary, tender...) is shown too.
+
+   Please keep the firm totals consistent: the firm rows should add up to
+   example_subset_summary (today they differ by 0.11 CHF).
+
+4. User edits: project_parameters.json contains "position_overrides", e.g.
+     "LV0013": {"product_id": "P-AIR-002", "quantity": 7, "unit_price_chf": 80.0,
+                "price_source": "Quote Trox 12.10.2026", "status": "calculated", "note": "..."}
+   These are corrections the user made to your previous output (keyed by lv_id). All fields are
+   optional; product_id "" means "no product". unit_price_chf = net unit price to use (e.g. from a
+   supplier quote) - treat that position as a firm price. Please apply them in the next run.
+
+5. Server requirements:
+   - CORS: allow origins https://dhinu78.github.io and http://localhost:5500.
+   - HTTPS, because the app runs on https. http://localhost is fine for testing on your own PC;
+     otherwise use a tunnel (e.g. "ngrok http 8000") or a server with a certificate.
+   - Accept uploads up to ~100 MB. Delete the files after each run.
+
+6. Easiest setup: a small FastAPI wrapper (api.py) next to your script.
+   pip install fastapi "uvicorn[standard]" python-multipart
+   - POST saves the five files to a temp folder, starts your script in a background thread,
+     returns 202 with a job_id.
+   - The thread runs your script, reads the two files it writes (updated parameters + output),
+     and stores {"parameters", "output"} in the job.
+   - GET returns the job's status/result.
+   Run: uvicorn api:app --port 8000
+   (A ready-made api.py is in the project README, section "Minimal server around an existing script".)
+
+7. Test without the app:
+   curl -F tender=@BKP.pdf -F catalog=@catalog.csv -F productivity=@productivity.csv \
+        -F parameters=@project_parameters.json -F meta=@meta.json http://localhost:8000/v1/estimates
+   curl http://localhost:8000/v1/estimates/<job_id>
+
+When it works, send me the URL (e.g. https://xyz.ngrok-free.app). I put it into the app and
+every Compute goes to your backend.

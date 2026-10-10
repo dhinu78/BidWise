@@ -1,5 +1,5 @@
 // Page 2: Edit parameters (full page, with "+" to add your own parameters).
-import { $, esc, toast, busy, choose } from "./ui.js";
+import { $, esc, toast, busy, choose, computeLabel } from "./ui.js";
 import { validateParameters } from "./validate.js";
 
 // Unit choices for new parameters -> suffix added to the stored key.
@@ -16,6 +16,10 @@ const SECTIONS = [
   { id: "commercial", title: "Commercial",
     sub: "Overhead, margin and rounding.", unitOf: unitFromKey, units: ["%", "CHF"], step: 0.1 },
 ];
+
+// Top-level keys with their own cards (or not shown); anything else gets a generic card.
+const KNOWN_TOP = new Set(["schema_version", "project", "productivity_factors", "allowances", "project_costs",
+  "commercial", "stretch_bid_optimization", "custom_parameters", "position_overrides"]);
 
 function unitFromKey(key) {
   if (key.endsWith("_pct")) return "%";
@@ -107,7 +111,8 @@ function render() {
 
   cards.push(`<section class="pcard"><h3>Project</h3><p class="sub">Basic information.</p>
     ${row({ path: "project.name", label: "Project name", value: p.project.name, type: "text" })}
-    ${row({ path: "project.id", label: "Project ID", value: p.project.id, type: "text" })}
+    ${row({ path: "project.client", label: "Client", value: p.project.client, type: "text" })}
+    ${row({ path: "project.id", label: "Tender / reference no.", value: p.project.id, type: "text" })}
     ${row({ path: "project.currency", label: "Currency", value: p.project.currency, type: "text" })}
     <div class="prow"><label>Tender file</label><span class="readonly" title="${esc(p.project.source_tender_file || "")}">${esc(p.project.source_tender_file || "not uploaded")}</span><span></span><span></span></div>
   </section>`);
@@ -125,10 +130,10 @@ function render() {
   const sb = p.stretch_bid_optimization;
   if (sb) {
     cards.push(`<section class="pcard"><h3>Bid scenarios</h3><p class="sub">Margin per scenario. Each scenario becomes one bid card on the dashboard.</p>
-      ${sb.scenario_names.map((name) => row({
+      ${(sb.scenario_names || []).map((name) => row({
         path: `stretch_bid_optimization.scenario_margins_pct.${name}`, label: name,
-        value: sb.scenario_margins_pct[name], unit: "%", step: 0.1,
-        custom: custom.has(`scenario.${name}`), removable: sb.scenario_names.length > 1,
+        value: sb.scenario_margins_pct?.[name], unit: "%", step: 0.1,
+        custom: custom.has(`scenario.${name}`), removable: (sb.scenario_names || []).length > 1,
       })).join("")}
       ${addRow("scenarios", ["%"], "New scenario name")}
     </section>`);
@@ -143,6 +148,22 @@ function render() {
       ${row({ path: "stretch_bid_optimization.maximum_probability", label: "Maximum probability", value: sb.maximum_probability, unit: "%", scale: 100 })}
     </section>`);
   }
+
+  // Sections this page doesn't know (e.g. added by the estimation backend): show their values too.
+  const leafRow = (path, k, v) => (typeof v === "boolean" ? row({ path, label: humanize(k), value: v, type: "checkbox" })
+    : typeof v === "number" ? row({ path, label: humanize(k), value: v, unit: unitFromKey(k) })
+    : typeof v === "string" ? row({ path, label: humanize(k), value: v, type: "text" })
+    : `<div class="prow"><label>${esc(humanize(k))}</label><span class="readonly" title="${esc(JSON.stringify(v))}">${esc(JSON.stringify(v))}</span><span></span><span></span></div>`);
+  const loose = [];
+  for (const [key, value] of Object.entries(p)) {
+    if (KNOWN_TOP.has(key)) continue;
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      cards.push(`<section class="pcard"><h3>${esc(humanize(key))}</h3><p class="sub">Additional parameters (e.g. from the estimation backend).</p>
+        ${Object.entries(value).map(([k, v]) => leafRow(`${key}.${k}`, k, v)).join("")}
+      </section>`);
+    } else loose.push(leafRow(key, key, value));
+  }
+  if (loose.length) cards.push(`<section class="pcard"><h3>Other</h3><p class="sub">Additional parameters.</p>${loose.join("")}</section>`);
 
   $("paramGrid").innerHTML = cards.join("");
 }
@@ -240,7 +261,7 @@ async function save() {
     draft = structuredClone(ctx.state.project.parameters);
     draft.custom_parameters ??= [];
     render();
-    toast("Parameters saved. Click Re-compute on the dashboard to store them as a new version.");
+    toast(`Parameters saved. Click ${computeLabel(ctx.state.project)} on the dashboard to calculate a new version with them.`);
     ok = true;
   });
   return ok;

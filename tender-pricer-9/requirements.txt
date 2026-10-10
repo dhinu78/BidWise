@@ -1,0 +1,9 @@
+pymupdf
+pandas
+pytest
+fastapi
+uvicorn
+python-multipart
+httpx
+openai>=1.40
+anthropic>=1.0

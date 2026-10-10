@@ -62,8 +62,8 @@
   .btn.green { background: var(--green); }
   .btn.navy { background: var(--navy); color: var(--green); }
   .btn.ghost { background: #fff; border: 1.5px solid var(--line); }
+  .btn.danger { background: var(--danger); color: #fff; }
   .btn.small { font-size: 13px; padding: 5px 10px; }
-  .btn:disabled { opacity: .5; cursor: progress; }
 
   /* ---------- dashboard ---------- */
   .uploads { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3.4rem; margin: 0 .9rem 1.9rem; }
@@ -79,10 +79,35 @@
   .version { font-weight: 700; font-size: 2.1rem; display: flex; align-items: baseline; gap: .6rem; margin-bottom: .2rem; }
   .version span { font-weight: 400; flex: 1; text-align: center; border-bottom: .22rem dotted var(--navy); }
   .side .btn { font-size: 1.95rem; padding: .5rem .6rem .6rem; text-align: center; border-radius: .6rem; white-space: nowrap; }
-  .scope { display: grid; grid-template-columns: 1fr 1fr; background: var(--panel); border-radius: 8px; padding: 3px; gap: 3px; }
-  .scope button { border: 0; background: none; border-radius: 6px; padding: .5rem .3rem; font-size: max(11px, .95rem); font-weight: 600; }
-  .scope button.on { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
-  .scope-note { margin: -1.1rem 0 0; font-size: max(10.5px, .85rem); color: var(--muted); }
+  .run-info { margin: -.6rem 0 0; font-size: max(10.5px, .85rem); color: var(--muted); text-align: center; }
+  .run-info.stale { color: #8a5a00; background: #fff4d6; border-radius: 6px; padding: .4rem .5rem; font-weight: 600; }
+  .side .btn.attention { box-shadow: 0 0 0 .22rem var(--amber); }
+  /* bid status: one colour per status (dashboard control and project list tags) */
+  .bid-status { --bs: #2f6fb2; --bs-bg: #e4eef8; display: flex; align-items: center; gap: .7rem; background: var(--bs-bg); border: .14rem solid var(--bs); border-radius: .6rem; padding: .35rem .8rem; margin-top: -.6rem; }
+  .bid-status i { width: 1.1rem; height: 1.1rem; border-radius: 50%; flex: none; background: var(--bs); }
+  .bid-status select { flex: 1; min-width: 0; font: inherit; font-size: 1.55rem; font-weight: 700; color: var(--bs); background: transparent; border: 0; padding: .2rem 0; cursor: pointer; }
+  .bid-status select option { color: var(--text); }
+  .bid-status.s-in_progress, .tag.bid-in_progress { --bs: #2f6fb2; --bs-bg: #e4eef8; }
+  .bid-status.s-awaiting_response, .tag.bid-awaiting_response { --bs: #a87400; --bs-bg: #fbf0d4; }
+  .bid-status.s-won, .tag.bid-won { --bs: #23804a; --bs-bg: #dcf0e3; }
+  .bid-status.s-lost, .tag.bid-lost { --bs: #b23a27; --bs-bg: #f8e0db; }
+  .tag[class*="bid-"] { background: var(--bs-bg); color: var(--bs); font-weight: 600; }
+  .btn:disabled, .btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+  /* ---------- start page (no project open) ---------- */
+  body[data-page="start"] .project-name { display: none !important; }
+  body[data-page="start"] #newBtn, body[data-page="start"] #projectsBtn { display: flex !important; }
+  body[data-page="start"] .only-sub { display: none !important; }
+  .start { max-width: 64rem; margin: 6vh auto 0; text-align: center; }
+  .start h2 { margin: 0 0 .6rem; font-size: max(24px, 2.6rem); }
+  .start > p { color: var(--muted); margin: 0 0 2rem; font-size: max(15px, 1.3rem); line-height: 1.5; }
+  .start .btn { font-size: max(17px, 1.55rem); padding: .7rem 2.2rem; }
+  .start-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2.4rem 0 .6rem; text-align: left; }
+  .start-steps div { background: var(--panel); border-radius: 10px; padding: 1rem 1.2rem; font-size: max(13px, 1.1rem); color: var(--muted); }
+  .start-steps b { display: block; color: var(--text); font-size: max(14px, 1.2rem); margin-bottom: .3rem; }
+  #startList { text-align: left; margin-top: 2.4rem; font-size: max(14px, 1.15rem); }
+  #startList h3 { font-size: max(16px, 1.35rem); margin: 0 0 .4rem; }
+  .start-empty { color: var(--muted); text-align: center; }
 
   .chart { position: relative; display: flex; align-items: center; justify-content: center; margin-top: -1.4rem; }
   .chart svg { width: 100%; height: auto; max-height: 26rem; display: block; margin: 0 auto; }
@@ -104,17 +129,22 @@
   .cost dd { margin: 0; border-bottom: .22rem dotted var(--navy); font-variant-numeric: tabular-nums; padding-left: .5rem; line-height: 1.15; }
   .cost .btn { margin-top: auto; align-self: center; font-size: 1.6rem; padding: .7rem 2.6rem; border-radius: .6rem; }
 
-  .bids { margin: 1.4rem 0 0; background: var(--panel); border-radius: .7rem; display: grid; grid-template-columns: repeat(var(--bid-cols, 3), 1fr); padding: 1.4rem 0 1.5rem; }
-  .bid { padding: 0 .75rem; display: grid; grid-template-rows: auto 1fr; }
-  .bid h3 { position: relative; text-align: center; margin: 0 0 2.6rem; font-size: 2.5rem; font-weight: 600; }
-  .bid dl { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.45rem 2.4rem; margin: 0; font-size: 1.85rem; padding: 0 0 .2rem; }
-  .bid + .bid dl { border-left: .19rem solid #555; margin-left: -.75rem; padding-left: .75rem; }
+  /* The bid row sizes itself from its own width (--u = 1rem, smaller when the row is narrower than
+     the page font allows, e.g. with the chat panel open), so all columns always fit. */
+  .bids { margin: 1.4rem 0 0; background: var(--panel); border-radius: .7rem; display: grid; grid-template-columns: repeat(var(--bid-cols, 3), minmax(0, 1fr)); padding: 1.4rem 0 1.5rem; container-type: inline-size; }
+  .bid { --u: min(1rem, calc(2.6cqi / var(--bid-cols, 3))); padding: 0 calc(.75 * var(--u)); display: grid; grid-template-rows: auto 1fr; }
+  .bid h3 { position: relative; text-align: center; margin: 0 0 calc(2.6 * var(--u)); font-size: calc(2.5 * var(--u)); font-weight: 600; }
+  .bid dl { display: grid; grid-template-columns: 1.1fr 1fr; gap: calc(1.45 * var(--u)) calc(2.4 * var(--u)); margin: 0; font-size: calc(1.85 * var(--u)); padding: 0 0 .2rem; }
+  .bid + .bid dl { border-left: .19rem solid #555; margin-left: calc(-.75 * var(--u)); padding-left: calc(.75 * var(--u)); }
   .bid dt { text-align: right; font-weight: 700; white-space: nowrap; }
-  .bid dd { margin: 0; display: flex; align-items: center; gap: .9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .bid.best h3::after { content: "best expected contribution"; position: absolute; left: 0; right: 0; top: 100%; margin-top: .2rem; font-size: max(10px, .8rem); font-weight: 700; color: var(--green-dark); letter-spacing: .05em; text-transform: uppercase; }
-  .bar { width: 10.3rem; height: 1.8rem; background: #777; border-radius: .9rem; overflow: hidden; flex: none; }
-  .bar i { display: block; height: 100%; border-radius: .9rem; }
+  .bid dd { margin: 0; display: flex; align-items: center; gap: calc(.9 * var(--u)); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bid.best h3::after { content: "recommended · highest win probability"; position: absolute; left: 0; right: 0; top: 100%; margin-top: .2rem; font-size: max(9px, calc(.8 * var(--u))); font-weight: 700; color: var(--green-dark); letter-spacing: .05em; text-transform: uppercase; }
+  .bar { width: calc(10.3 * var(--u)); height: calc(1.8 * var(--u)); background: #777; border-radius: calc(.9 * var(--u)); overflow: hidden; flex: none; }
+  .bar i { display: block; height: 100%; border-radius: calc(.9 * var(--u)); }
   .hint { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: max(13px, 1rem); margin: 1rem 0 0; }
+
+  /* ---------- detailed summary (below the dashboard) ---------- */
+  .summary-section { margin-top: 2.2rem; padding-top: 1.6rem; border-top: 3px solid var(--panel); scroll-margin-top: 12px; }
 
   /* ---------- parameters page ---------- */
   .page-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 16px; }
@@ -161,17 +191,41 @@
   thead th { position: sticky; top: 0; background: var(--navy); color: #fff; font-weight: 600; cursor: pointer; user-select: none; z-index: 1; }
   thead th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
   tbody tr:hover { background: #f3f7f4; }
-  tfoot td { position: sticky; bottom: 0; background: #eef3ef; font-weight: 700; border-top: 2px solid var(--navy); }
+  tfoot { position: sticky; bottom: 0; z-index: 1; }
+  tfoot td { background: #eef3ef; font-weight: 700; }
+  tfoot tr:first-child td { border-top: 2px solid var(--navy); }
+  tfoot tr.est-total td { background: #fbf4e2; color: #7a5a12; font-weight: 600; font-style: italic; }
   .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
   .status i { width: 10px; height: 10px; border-radius: 50%; }
   .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; }
   td.desc { max-width: 340px; overflow: hidden; text-overflow: ellipsis; }
   td.note { max-width: 300px; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  /* resizable columns (js/summary-page.js) */
+  thead th .col-grip { position: absolute; top: 0; right: -4px; width: 9px; height: 100%; cursor: col-resize; z-index: 2; touch-action: none; }
+  thead th .col-grip::after { content: ""; position: absolute; top: 25%; bottom: 25%; left: 4px; width: 1px; background: rgba(255,255,255,.35); }
+  thead th:hover .col-grip::after, .col-resizing thead th .col-grip::after { background: var(--green); width: 2px; }
+  body.col-resizing, body.col-resizing * { cursor: col-resize !important; user-select: none !important; }
   td .edit { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 12px; }
   tr.overridden td:first-child { box-shadow: inset 4px 0 0 var(--amber); }
   .pending { font-size: 10px; background: var(--amber); border-radius: 8px; padding: 1px 6px; margin-left: 6px; }
   .split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; margin-bottom: 18px; }
   .split .card h3 { margin: 0 0 10px; font-size: 17px; }
+  .card-sub { margin: -4px 0 10px; color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+  .card .card-sub:last-child { margin: 10px 0 0; }
+  .card-h4 { margin: 16px 0 6px; font-size: 14.5px; }
+  .card-h4 small { color: var(--muted); font-weight: 500; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 1px 8px; white-space: nowrap; }
+  .badge.firm { background: #d8f0de; color: #1f6a39; }
+  .badge.est { background: #f8e8bf; color: #7a5a12; }
+  .badge.none { background: #e6e9ec; color: #55606b; }
+  td.est { font-style: italic; color: #7a5a12; }
+  .why tr[data-flag] { cursor: pointer; }
+  .why tr[data-flag]:hover td { background: #f3f7f4; }
+  .why tr.on td { background: #e4efe7; font-weight: 600; }
+  .conf-warn { color: #8a5a00; background: #fff4d6; border-radius: 6px; padding: 1px 6px; font-weight: 600; }
+  .cost-strip.ind { grid-template-columns: repeat(3, 1fr); margin-top: -4px; }
+  .cost-strip.ind .tile { background: #fbf6e8; }
+  .cost-strip .tile em { display: block; font-style: normal; font-size: 12px; color: var(--muted); margin-top: 2px; }
   .mini { width: 100%; font-size: 13.5px; }
   .mini td, .mini th { padding: 5px 6px; white-space: normal; }
   .mini th { position: static; background: none; color: var(--muted); cursor: default; font-weight: 600; border-bottom: 1px solid #ccc; }
@@ -204,6 +258,9 @@
   .list-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 8px; border-bottom: 1px solid #eee; cursor: pointer; }
   .list-row:hover { background: #f4f7f5; }
   .list-row small { color: var(--muted); }
+  .list-row > span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .row-del { background: none; border: 1px solid transparent; border-radius: 6px; color: var(--muted); padding: 3px 5px; margin-left: 4px; display: grid; place-items: center; cursor: pointer; }
+  .row-del:hover { color: var(--danger); border-color: var(--danger); background: #fff; }
   .tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--panel); }
   .tag.ok { background: #d8f0de; } .tag.bad { background: #f6d6d3; }
   .ask input { width: 100%; padding: 9px 11px; border: 1px solid #bbb; border-radius: 8px; }
@@ -215,6 +272,93 @@
   .spinner { width: 42px; height: 42px; border-radius: 50%; border: 5px solid var(--green); border-top-color: var(--navy); animation: spin 0.9s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ---------- AI assistant (js/ai.js) ---------- */
+  /* When the chat is open on a wide screen, the page moves left and re-scales to the remaining
+     width, so nothing is hidden behind the panel and the page keeps scrolling normally. */
+  :root { --ai-w: 460px; }
+  @media (min-width: 900px) {
+    html.ai-open { font-size: clamp(9px, calc((100vw - var(--ai-w)) * 0.008333), 20px); }
+    html.ai-open body > .stripe, html.ai-open body > header, html.ai-open body > main { margin-right: var(--ai-w); }
+  }
+  .ai-stale { color: #ffd88a; font-weight: 600; }
+  .ai-change { background: #fff; border: 1px solid #cfd8de; border-left: 4px solid var(--amber); border-radius: 10px; padding: 10px 12px; }
+  .ai-change.applied { border-left-color: var(--green-dark); }
+  .ai-change.dismissed { opacity: .6; }
+  .ai-change-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .ai-change-head small { color: var(--muted); font-size: 11.5px; }
+  .ai-change p { margin: 6px 0; }
+  .ai-change ul { margin: 6px 0; padding-left: 18px; }
+  .ai-change li { margin: 4px 0; line-height: 1.4; }
+  .ai-change li small { color: var(--muted); }
+  .ai-change-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .ai-change-actions span { color: var(--muted); font-size: 13px; margin-right: auto; }
+  .ai-change-err { color: var(--danger); font-size: 13px; margin: 6px 0 0; }
+  .ai-change-status { color: var(--danger); }
+  .ai-attach { border: 1px solid #bbb; background: #fff; border-radius: 8px; font-size: 18px; padding: 6px 9px; align-self: stretch; }
+  .ai-attach:hover { border-color: var(--navy); }
+  .ai-attach:disabled { opacity: .45; }
+  .ai-quote { background: #fff; border: 1px solid #cfd8de; border-left: 4px solid var(--navy); border-radius: 10px; padding: 10px 12px; }
+  .ai-quote p { margin: 6px 0; font-size: 13px; color: var(--muted); }
+  .ai-quote table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+  .ai-quote th { position: static; background: #f4f6f7; color: var(--navy); cursor: default; font-weight: 600; padding: 4px 6px; }
+  .ai-quote td { padding: 4px 6px; border-bottom: 1px solid #eee; white-space: normal; vertical-align: top; }
+  .ai-change-err.working { color: var(--muted); font-style: italic; }
+  .ai-fab { position: fixed; right: 22px; bottom: 22px; z-index: 14; display: none; align-items: center; gap: 8px;
+    background: var(--navy); color: var(--green); border: 0; border-radius: 26px; padding: 12px 18px 12px 14px;
+    font-weight: 700; font-size: 15px; box-shadow: 0 6px 18px rgba(2,35,56,.3); }
+  body.signed-in:not([data-page="start"]) .ai-fab { display: inline-flex; }
+  body.ai-open .ai-fab { display: none !important; }
+  .ai-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); z-index: 16; background: #fff;
+    display: flex; flex-direction: column; box-shadow: -8px 0 28px rgba(2,35,56,.18); font-size: 14px; }
+  .ai-panel header { display: flex; align-items: center; gap: 8px; padding: 14px 16px; background: var(--navy); color: #fff; }
+  .ai-panel header div { flex: 1; display: flex; flex-direction: column; }
+  .ai-panel header small { color: #cfe6d6; font-size: 12px; margin-top: 1px; }
+  .ai-panel header b { letter-spacing: .06em; }
+  .ai-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green); color: var(--navy); display: grid; place-items: center; flex: none; }
+  .ai-avatar svg { width: 24px; height: 24px; }
+  .ai-fab svg { width: 24px; height: 24px; flex: none; }
+  .ai-fab span { letter-spacing: .06em; }
+  .ai-panel header button { background: none; border: 0; color: #fff; font-size: 22px; line-height: 1; padding: 2px 6px; }
+  .ai-log { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; background: #f6f7f8; }
+  .ai-msg { max-width: 92%; padding: 9px 12px; border-radius: 12px; line-height: 1.45; background: #fff; border: 1px solid #e3e6e9; }
+  .ai-msg p { margin: 0 0 6px; } .ai-msg p:last-child { margin: 0; }
+  .ai-msg ul, .ai-msg ol { margin: 4px 0 6px; padding-left: 20px; } .ai-msg li { margin: 2px 0; }
+  .ai-msg code { background: #eef1f3; border-radius: 4px; padding: 0 4px; font-size: 12.5px; }
+  .ai-msg .ai-h { font-weight: 700; margin-top: 6px; }
+  .ai-msg.user { align-self: flex-end; background: var(--navy); color: #fff; border-color: var(--navy); }
+  .ai-msg.intro, .ai-msg.notice { color: var(--muted); }
+  .ai-msg.error { border-color: var(--danger); color: var(--danger); background: #fff3f2; }
+  .ai-msg.quota { border-color: var(--amber); background: #fff7e3; color: #6b4d00; }
+  .ai-mail { background: #fff; border: 1px solid #cfd8de; border-left: 4px solid var(--green-dark); border-radius: 10px; padding: 10px 12px; }
+  .ai-mail-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .ai-mail-head small { color: var(--muted); font-size: 11.5px; text-align: right; }
+  .ai-mail-sub { margin: 4px 0 6px; font-size: 13px; } .ai-mail-sub span { color: var(--muted); }
+  .ai-mail pre { white-space: pre-wrap; font: inherit; font-size: 13px; margin: 0; max-height: 220px; overflow: auto; background: #f8f9fa; border-radius: 6px; padding: 8px; }
+  .ai-mail-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+  .ai-mail-actions a { text-decoration: none; }
+  .ai-panel header .ai-hbtn { font-size: 12.5px; font-weight: 600; border: 1px solid rgba(255,255,255,.45); border-radius: 12px; padding: 3px 10px; }
+  .ai-panel header .ai-hbtn.on { background: var(--green); color: var(--navy); border-color: var(--green); }
+  .ai-panel header button:disabled { opacity: .4; cursor: default; }
+  .ai-history { flex: 1; overflow-y: auto; padding: 14px 16px; background: #f6f7f8; display: flex; flex-direction: column; gap: 8px; }
+  .ai-hist-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .ai-hist-note { color: var(--muted); margin: 4px 0; }
+  .ai-hist-item { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e3e6e9; border-radius: 10px; padding: 9px 10px 9px 12px; cursor: pointer; }
+  .ai-hist-item:hover { border-color: var(--navy); }
+  .ai-hist-item.on { border-left: 4px solid var(--green-dark); }
+  .ai-hist-item div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ai-hist-item b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+  .ai-hist-item small { color: var(--muted); font-size: 11.5px; }
+  .ai-hist-item button { background: none; border: 0; font-size: 15px; opacity: .55; padding: 2px 4px; }
+  .ai-hist-item button:hover { opacity: 1; }
+  .ai-thinking { padding: 6px 16px; color: var(--muted); font-size: 13px; font-style: italic; background: #f6f7f8; }
+  .ai-quick { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0; }
+  .ai-quick button { border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 4px 10px; font-size: 12.5px; }
+  .ai-quick button:hover { border-color: var(--navy); }
+  .ai-form { display: flex; gap: 8px; padding: 10px 16px 6px; align-items: flex-end; }
+  .ai-form textarea { flex: 1; resize: none; border: 1px solid #bbb; border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; }
+  .ai-foot { margin: 0; padding: 0 16px 10px; color: var(--muted); font-size: 11px; }
+  @media print { .ai-fab, .ai-panel { display: none !important; } }
+
   @media (max-width: 1300px) {
     html { font-size: max(9px, 1.05vw); }
     .dash-mid { grid-template-columns: 18rem 1fr 17rem; }
@@ -224,6 +368,7 @@
     .split { grid-template-columns: 1fr; }
   }
   @media (max-width: 860px) {
+    .start-steps { grid-template-columns: 1fr; }
     html { font-size: 9px; }
     .stripe { height: 14px; }
     .brand { gap: 16px; }
@@ -232,6 +377,7 @@
     .side { flex-direction: row; flex-wrap: wrap; gap: 10px; }
     .side .btn { font-size: 16px; }
     .bids { grid-template-columns: 1fr; }
+    .bid { --u: 1rem; }
     .bid + .bid { border-top: 3px solid #999; padding-top: 16px; margin-top: 16px; }
     .bid + .bid dl { border-left: 0; margin-left: 0; padding-left: 0; }
     .param-grid { grid-template-columns: 1fr; }
@@ -239,7 +385,7 @@
     .tiles, .cost-strip { grid-template-columns: repeat(2, 1fr); }
   }
   @media print {
-    .stripe, .icon-btn, .plain-icon, .user, .side .btn, .scope, .file-chip .plain-icon, .back-btn, .save-btn, .toolbar, td .edit { display: none !important; }
+    .stripe, .icon-btn, .plain-icon, .user, .side .btn, .run-info, .file-chip .plain-icon, .back-btn, .save-btn, .toolbar, td .edit { display: none !important; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .table-wrap { max-height: none; overflow: visible; }
   }
@@ -289,6 +435,21 @@
 </section>
 
 <!-- page 1: dashboard -->
+<main id="page-start" hidden>
+  <div class="start">
+    <h2 id="startTitle">Welcome</h2>
+    <p>BIDWISE turns a tender's bill of quantities into a reviewable first price and a recommended bid range.<br>
+      Create a project for each tender, or open one of your projects.</p>
+    <button class="btn navy" id="startNewBtn">+ New project</button>
+    <div class="start-steps">
+      <div><b>1 · Upload</b>Tender PDF, your product catalogue and productivity rules (CSV).</div>
+      <div><b>2 · Compute</b>Positions are extracted, matched, priced and saved as a version.</div>
+      <div><b>3 · Review &amp; bid</b>Check assumptions, edit positions, compare bid scenarios.</div>
+    </div>
+    <div id="startList"></div>
+  </div>
+</main>
+
 <main id="page-dashboard" hidden>
   <div class="uploads">
     <div class="upload"><label>Tender</label><div class="file-chip"><span class="fname" id="f-tender"></span><button class="plain-icon" data-upload="tender" title="Upload tender PDF"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 15V4M7 9l5-5 5 5M4 15v5h16v-5"/></svg></button></div></div>
@@ -300,13 +461,14 @@
   <div class="dash-mid">
     <div class="side">
       <div class="version">Version <span id="versionNo">–</span></div>
+      <label class="bid-status" id="bidStatusBox" title="Where this bid stands; kept as history for later bids">
+        <i></i>
+        <select id="bidStatus" aria-label="Bid status"></select>
+      </label>
       <button class="btn grey" id="historyBtn">Version History</button>
       <button class="btn green" id="paramsBtn">Edit parameters</button>
-      <button class="btn navy" id="recomputeBtn">Re-compute</button>
-      <div class="scope" id="scopeToggle" role="group" aria-label="Calculation scope">
-        <button data-scope="full" class="on">Full tender</button><button data-scope="verified">Verified subset</button>
-      </div>
-      <p class="scope-note" id="scopeNote"></p>
+      <button class="btn navy" id="recomputeBtn">Compute</button>
+      <p class="run-info" id="runInfo"></p>
     </div>
     <div class="chart" id="chart"></div>
     <div class="card counts">
@@ -322,29 +484,30 @@
   </div>
 
   <div class="bids" id="bids"></div>
+
+  <!-- detailed summary, right below the dashboard (js/summary-page.js) -->
+  <section id="summarySection" class="summary-section" hidden>
+    <div class="page-title">
+      <h2>Detailed summary</h2>
+      <div class="toolbar" style="margin:0">
+        <label for="summaryVersion" style="font-weight:600">Version</label>
+        <select id="summaryVersion"></select>
+      </div>
+    </div>
+    <div id="summaryBody"></div>
+  </section>
 </main>
 
 <!-- page 2: edit parameters -->
 <main id="page-params" hidden>
   <div class="page-title">
     <h2>Project parameters</h2>
-    <p>Changes are stored with the next <b>Re-compute</b> as a new version. Use <b>+</b> to add your own parameters.</p>
+    <p>Saved changes are used by the next <b>Compute</b> / <b>Re-compute</b>, which stores them in a new version. Use <b>+</b> to add your own parameters.</p>
   </div>
   <div id="paramErrors" class="param-errors" hidden></div>
   <div class="param-grid" id="paramGrid"></div>
 </main>
 
-<!-- page 3: detailed summary -->
-<main id="page-summary" hidden>
-  <div class="page-title">
-    <h2>Detailed summary</h2>
-    <div class="toolbar" style="margin:0">
-      <label for="summaryVersion" style="font-weight:600">Version</label>
-      <select id="summaryVersion"></select>
-    </div>
-  </div>
-  <div id="summaryBody"></div>
-</main>
 
 <dialog id="dlg">
   <div class="dlg-head"><h3 id="dlgTitle"></h3><button data-close aria-label="Close">×</button></div>

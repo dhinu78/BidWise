@@ -1,0 +1,23 @@
+lv_id,system,source_page,category,description,quantity,unit,manufacturer_hint,model_hint,expected_install_code,suggested_product_id,ground_truth_status
+LV0001,244.01 LA01 Nebenraeume UG,78,Air terminal,"Supply air valve, plastic, airflow adjustable, DN100",5,pc,Trox Hesco,Z-LVS,DIFFUSER,P-AIR-001,calculated
+LV0002,244.01 LA01 Nebenraeume UG,78,Air terminal,"Supply air valve, plastic, airflow adjustable, DN125",6,pc,Trox Hesco,Z-LVS,DIFFUSER,P-AIR-002,calculated
+LV0003,244.01 LA01 Nebenraeume UG,79,Air terminal,"Exhaust air valve, plastic, airflow adjustable, DN100",5,pc,Trox Hesco,LVS,DIFFUSER,P-AIR-003,calculated
+LV0004,244.01 LA01 Nebenraeume UG,79,Fire protection,"Fire damper EI90-S with actuator and interface, DN100",4,pc,Trox Hesco,FKRS-EU / FK2-EU,FIRE_DAMPER,P-FIR-001,calculated
+LV0005,244.01 LA01 Nebenraeume UG,80,Damper,"Manual balancing damper, galvanized, DN125",6,pc,,,DAMPER,P-DAM-001,calculated
+LV0006,244.01 LA01 Nebenraeume UG,80,Silencer,Rectangular silencer 400x300x1250 mm,4,pc,Trox Hesco,MS-F,SILENCER,P-SIL-001,supplier_quote_required
+LV0007,244.02 LA02 Essenraeume EG,106,Flow controller,Variable volume flow controller 500x300 mm with actuator and Modbus,4,pc,Trox Hesco / Belimo,TVJ-D,VAV_CONTROLLER,P-VAV-001,supplier_quote_required
+LV0008,244.02 LA02 Essenraeume EG,107,Flow controller,Constant volume flow controller DN250,6,pc,Trox Hesco,VFC,CAV_CONTROLLER,P-CAV-001,calculated
+LV0009,244.02 LA02 Essenraeume EG,107,Silencer,"Compact silencer DN100, length 900 mm",6,pc,allvotech,KOSD 100/900,SILENCER,P-SIL-002,calculated
+LV0010,244.02 LA02 Essenraeume EG,107,Silencer,Rectangular duct silencer 600x600x1750 mm,4,pc,Trox Hesco,MS-F,SILENCER,P-SIL-003,supplier_quote_required
+LV0011,244.04 LA04 Schulzimmer OG,163,Silencer,Rectangular silencer 540x400x1250 mm,6,pc,Trox Hesco,MS-F,SILENCER,P-SIL-004,supplier_quote_required
+LV0012,244.04 LA04 Schulzimmer OG,163,Flow controller,Variable volume flow controller 300x200 mm,6,pc,Trox Hesco,TVJ-D,VAV_CONTROLLER,P-VAV-002,supplier_quote_required
+LV0013,244.04 LA04 Schulzimmer OG,164,Flow controller,Variable volume flow controller DN125,10,pc,Trox Hesco,TVR-D,VAV_CONTROLLER,P-VAV-003,calculated
+LV0014,244.04 LA04 Schulzimmer OG,164,Flow controller,Variable volume flow controller DN160,6,pc,Trox Hesco,TVR-D,VAV_CONTROLLER,P-VAV-004,calculated
+LV0015,244.04 LA04 Schulzimmer OG,164,Flow controller,Variable volume flow controller DN200,12,pc,Trox Hesco,TVR-D,VAV_CONTROLLER,P-VAV-005,calculated
+LV0016,244.04 LA04 Schulzimmer OG,169,Insulation,"External thermal duct insulation, mineral wool 30 mm",52,m2,,,INSULATION_30,P-INS-001,calculated
+LV0017,244.04 LA04 Schulzimmer OG,169,Insulation,"External thermal duct insulation, mineral wool 60 mm",12,m2,,,INSULATION_60,P-INS-002,calculated
+LV0018,244.04 LA04 Schulzimmer OG,169,Insulation,Weatherproof external insulation 100 mm with stainless steel cladding,440,m2,,,INSULATION_EXT,P-INS-003,supplier_quote_required
+LV0019,244.04 LA04 Schulzimmer OG,170,Fire protection,EI30 penetration sealing for rectangular duct 300x200 mm,4,pc,Flumroc or equivalent,certified system,FIRE_SEAL_RECT,P-FIR-002,calculated
+LV0020,244.04 LA04 Schulzimmer OG,170,Fire protection,EI30 penetration sealing for circular duct DN160,8,pc,Flumroc or equivalent,certified system,FIRE_SEAL_ROUND,P-FIR-003,calculated
+LV0021,244.04 LA04 Schulzimmer OG,171,Support,Connection angles for wall or ceiling mounting,8,pc,,,SUPPORT_SET,P-SUP-001,calculated
+LV0022,244.04 LA04 Schulzimmer OG,171,Fire protection,"Inspection cover for fire insulation, duct 400x200 mm",8,pc,Flumroc or equivalent,certified system,FIRE_ACCESS,P-FIR-004,calculated

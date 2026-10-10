@@ -6,6 +6,22 @@ const de = (min, max) => new Intl.NumberFormat("de-DE", { minimumFractionDigits:
 export const chf = (v) => (v == null || Number.isNaN(+v) ? "–" : de(2, 2).format(+v));
 export const num = (v, d = 2) => (v == null || Number.isNaN(+v) ? "–" : de(0, d).format(+v));
 export const pct = (v, d = 1) => (v == null || Number.isNaN(+v) ? "–" : `${de(0, d).format(+v)}%`);
+/** "Compute" for a project's first version, "Re-compute" once it has one. */
+export const computeLabel = (project) => (project?.currentVersion ? "Re-compute" : "Compute");
+
+/** JSON with sorted object keys, to compare objects whose key order may differ (Firestore). */
+export const stableJson = (v) => JSON.stringify(v, (k, x) => (x && typeof x === "object" && !Array.isArray(x)
+  ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : x));
+
+/** Comparable form of an edit / of parameters: without when/who it was saved. */
+const stripMeta = (o) => (o && typeof o === "object" ? (({ updatedAt, updatedBy, ...rest }) => rest)(o) : o);
+export const editKey = (o) => stableJson(stripMeta(o) ?? null);
+export function paramsKey(params) {
+  const p = { ...(params || {}) };
+  p.position_overrides = Object.fromEntries(Object.entries(p.position_overrides || {}).map(([k, v]) => [k, stripMeta(v)]));
+  return stableJson(p);
+}
+
 /** "BKP_244_LV_Lueftung_260804.pdf" -> "BKP_244_Lu…804.pdf" (keeps the extension visible). */
 export function shortName(name, max = 20) {
   const s = String(name || "");

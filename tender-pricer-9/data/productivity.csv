@@ -1,0 +1,23 @@
+install_code,work_type,unit,base_hours_per_unit,labour_role,default_hourly_rate_chf,factor_keys
+DIFFUSER,Install grille or air valve,pc,0.65,installer,96,site_efficiency|mounting_height_school|school_logistics
+DAMPER,Install manual/control damper,pc,1.4,installer,96,site_efficiency|mounting_height_school|school_logistics
+FIRE_DAMPER,Install fire damper incl. normal interfaces,pc,3.2,lead_installer,118,site_efficiency|mounting_height_school|timber_interface|school_logistics
+SILENCER,Install silencer,pc,2.1,installer,96,site_efficiency|mounting_height_school|school_logistics
+VAV_CONTROLLER,Install variable air-volume controller,pc,2.4,lead_installer,118,site_efficiency|mounting_height_school|school_logistics
+CAV_CONTROLLER,Install constant air-volume controller,pc,1.65,installer,96,site_efficiency|mounting_height_school|school_logistics
+DUCT_ROUND,Install circular galvanized duct,m,0.38,installer,96,site_efficiency|mounting_height_school|school_logistics
+DUCT_RECT,Install rectangular galvanized duct,m2,0.42,installer,96,site_efficiency|mounting_height_school|school_logistics
+DUCT_FITTING,Install duct fitting/transition,pc,0.75,installer,96,site_efficiency|mounting_height_school|school_logistics
+INSULATION_30,Install 30 mm duct insulation,m2,0.32,installer,96,site_efficiency|mounting_height_school|school_logistics
+INSULATION_60,Install 60 mm duct insulation,m2,0.42,installer,96,site_efficiency|mounting_height_school|school_logistics
+INSULATION_EXT,Install weatherproof insulation with cladding,m2,0.85,lead_installer,118,site_efficiency|mounting_height_school|school_logistics
+FIRE_SEAL_RECT,Install certified rectangular fire seal,pc,3.5,lead_installer,118,site_efficiency|timber_interface|school_logistics
+FIRE_SEAL_ROUND,Install certified circular fire seal,pc,2.4,lead_installer,118,site_efficiency|timber_interface|school_logistics
+FIRE_ACCESS,Install inspection cover in fire insulation,pc,1.25,lead_installer,118,site_efficiency|mounting_height_school|school_logistics
+SUPPORT_SET,Install support/connection-angle set,pc,0.8,installer,96,site_efficiency|timber_interface|mounting_height_school|school_logistics
+AHU_LARGE,Place and mechanically assemble large AHU,pc,34.0,lead_installer,118,site_efficiency|school_logistics|mounting_height_school
+FAN,Install fan unit,pc,5.0,installer,96,site_efficiency|school_logistics|mounting_height_school
+CONTROL_POINT,Install field control device,pc,1.1,commissioning_specialist,155,site_efficiency|school_logistics
+COMMISSION_SYSTEM,"Test, balance and commission one system",system,16.0,commissioning_specialist,155,site_efficiency|school_logistics
+DOCUMENT_SYSTEM,Prepare system documentation/as-built handover,system,10.0,project_engineer,145,school_logistics
+UNKNOWN,Manual review only,pc,0.0,manual,0,

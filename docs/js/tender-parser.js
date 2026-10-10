@@ -1,17 +1,23 @@
 // Tender PDF -> LV positions, in the browser (pdf.js).
 //
-// Port of lv_extractor.py from the starter package: every page with the
-// "SH Erlenstrasse Oberglatt <system> Seite n / m" header is an LV page. On it, every line
-// with a unit in the "Mass-Gattg." column is a priceable quantity line; the item heading,
-// section, system, Fabrikat/Typ hints and source page are attached to it.
+// Rule-based reader for Swiss bills of quantities (Leistungsverzeichnis, NPK/BKP layout), based
+// on lv_extractor.py: a page is an LV page when its column headings name a unit column
+// ("Mass-Gattg." / "Einheit") and a quantity column ("Massbetrag" / "Menge"). On it, every line
+// with a unit in the unit column is a quantity position; the item heading, section, system
+// (BKP code from the page header or footer), Fabrikat/Typ hints and source page are attached.
+// When a backend is configured (js/backend.js) the backend reads the PDF instead.
 const PDFJS = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
 const PDFJS_WORKER = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 
 export const UNITS = {
-  "Stk": "pc", "Stk.": "pc", "St": "pc", "m": "m", "lfm": "m", "m2": "m2", "m²": "m2",
-  "Tage": "day", "Std": "h", "Std.": "h", "h": "h", "psch": "LS", "LS": "LS", "gl": "LS", "kg": "kg",
+  "Stk": "pc", "Stk.": "pc", "St": "pc", "St.": "pc", "Stück": "pc", "m": "m", "lfm": "m", "m1": "m",
+  "m2": "m2", "m²": "m2", "m3": "m3", "m³": "m3", "Tage": "day", "Std": "h", "Std.": "h", "h": "h",
+  "psch": "LS", "psch.": "LS", "Pauschal": "LS", "LS": "LS", "gl": "LS", "Gl": "LS", "kg": "kg", "t": "t",
 };
-const HEADER_RE = /^SH Erlenstrasse Oberglatt\s+(.*?)\s+Seite \d+ \/ \d+/;
+const UNIT_HEADERS = ["Gattg.", "Mass-Gattg.", "Einheit", "ME"];
+const QTY_HEADERS = ["betrag", "Massbetrag", "Menge"];
+const PAGE_NO_RE = /\s*(Seite|Page)\s+\d+\s*(\/|von)\s*\d+.*$/i;
+const BKP_RE = /\b(\d{3}\.\d{1,2})\b/;
 const SECTION_RE = /^([A-H])\s+([A-ZÄÖÜ][A-ZÄÖÜ /\-]{3,})$/;
 const ATTR_RE = /\b(Fabrikat|Typ|Offerte|Material|Luftmenge)\b\s*(.*)$/;
 const AIRFLOW_RE = /(?:Luftmenge|Luftvolumenstrom)\s*:?\s*([\d'’`]+)\s*m[3³]\/h/;
@@ -50,8 +56,8 @@ function pageWords(items, viewport) {
       // glue onto the previous word when the glyphs touch (pdf.js splits runs at font changes)
       const prev = words.at(-1);
       if (prev && Math.abs(prev.top - top) < 1.5 && x0 - prev.x1 < 0.6 && x0 >= prev.x0) {
-        prev.text += m[0]; prev.x1 = x1;
-      } else words.push({ text: m[0], x0, x1, top });
+        prev.text += m[0]; prev.x1 = x1; prev.base = Math.max(prev.base, vy);
+      } else words.push({ text: m[0], x0, x1, top, base: vy });
     }
   }
   return words;
@@ -68,6 +74,32 @@ function pageLines(words) {
   return lines.map((ws) => ws.sort((p, q) => p.x0 - q.x0));
 }
 
+const r1 = (v) => Math.round(v * 10) / 10;
+
+/**
+ * All text lines of a PDF with word positions (points from the top-left), for filling in forms.
+ * @returns {Promise<{width:number,height:number,lines:{text:string,top:number,base:number,words:object[]}[]}[]>}
+ */
+export async function readPdfLines(pdfData, onProgress) {
+  const pdfjs = await loadPdfjs();
+  const data = typeof pdfData?.arrayBuffer === "function" ? await pdfData.arrayBuffer() : pdfData;
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(data), isEvalSupported: false }).promise;
+  const pages = [];
+  for (let pno = 1; pno <= pdf.numPages; pno++) {
+    const page = await pdf.getPage(pno);
+    const viewport = page.getViewport({ scale: 1 });
+    const content = await page.getTextContent();
+    const lines = pageLines(pageWords(content.items, viewport)).map((ws) => ({
+      text: ws.map((w) => w.text).join(" ").trim(), top: ws[0].top, base: Math.max(...ws.map((w) => w.base)), words: ws,
+    }));
+    pages.push({ width: viewport.width, height: viewport.height, lines });
+    page.cleanup();
+    onProgress?.(pno, pdf.numPages);
+  }
+  await pdf.destroy();
+  return pages;
+}
+
 /**
  * Extract all quantity positions from the tender PDF.
  * @param {Blob|ArrayBuffer} pdfData
@@ -76,7 +108,7 @@ function pageLines(words) {
  */
 export async function parseTender(pdfData, onProgress) {
   const pdfjs = await loadPdfjs();
-  const data = pdfData instanceof ArrayBuffer ? pdfData : await pdfData.arrayBuffer();
+  const data = typeof pdfData?.arrayBuffer === "function" ? await pdfData.arrayBuffer() : pdfData;
   const pdf = await pdfjs.getDocument({ data: new Uint8Array(data), isEvalSupported: false }).promise;
 
   const rows = [];
@@ -94,19 +126,26 @@ export async function parseTender(pdfData, onProgress) {
     onProgress?.(pno, pdf.numPages);
     if (!lines.length) continue;
 
-    const head = lines[0].map((w) => w.text).join(" ");
-    const m = HEADER_RE.exec(head);
-    if (!m) continue;                                  // cover, conditions, unit-price tables
+    // LV page = column headings for unit and quantity within the first lines
+    const hdr = {};
+    for (const ws of lines.slice(0, 6)) for (const w of ws) hdr[w.text] ??= w;
+    const unitHead = UNIT_HEADERS.map((k) => hdr[k]).find(Boolean);
+    const qtyHead = QTY_HEADERS.map((k) => hdr[k]).find(Boolean);
+    if (!unitHead || !qtyHead) continue;               // cover, conditions, descriptions
     lvPages++;
-    const hdrSys = m[1].trim();
-    const hdrCode = hdrSys.split(/\s+/)[0];
-    names[hdrCode] ??= hdrSys;
-    // footer file name ("...\244.05 LA05 Turnhalle.docx") is more reliable than the header
+
+    // system: BKP code + name from the running header ("… 244.01 LA01 Nebenräume Seite 3 / 22");
+    // a "…¤.05 LA05 Turnhalle.docx" footer wins when header and footer disagree
+    const head = lines[0].map((w) => w.text).join(" ").replace(PAGE_NO_RE, "").trim();
+    const hm = BKP_RE.exec(head);
+    const hdrCode = hm ? hm[1] : "";
+    const hdrSys = hm ? head.slice(hm.index).trim() : "";
+    if (hdrCode) names[hdrCode] ??= hdrSys;
     const foot = lines.at(-1).map((w) => w.text).join(" ");
-    const fm = /(244\.\d\d)[^\\]*\.docx/.exec(foot);
-    const code = fm ? fm[1] : hdrCode;
-    const newSys = names[code] ?? hdrSys;
-    const warn = code !== hdrCode ? `page header says '${hdrSys}', footer says ${code}` : "";
+    const fm = /(\d{3}\.\d{1,2})[^\\]*\.docx/.exec(foot);
+    const code = fm ? fm[1] : hdrCode || system?.split(" ")[0] || "000";
+    const newSys = names[code] ?? (hdrSys || system || "General");
+    const warn = hdrCode && code !== hdrCode ? `page header says '${hdrSys}', footer says ${code}` : "";
     if (newSys !== system) {
       system = newSys; section = null; itemTitle = null; attrs = {}; systemAirflow = null;
     }
@@ -114,10 +153,7 @@ export async function parseTender(pdfData, onProgress) {
     sys.last_page = pno;
 
     // locate the unit ("Mass-Gattg.") and quantity ("Massbetrag") columns on this page
-    const hdr = {};
-    for (const ws of lines.slice(0, 4)) for (const w of ws) hdr[w.text] ??= w;
-    const ux = hdr["Gattg."]?.x0 ?? 375;
-    const qx = hdr["betrag"]?.x0 ?? 409;
+    const ux = unitHead.x0, qx = qtyHead.x0;
     const unitRng = [ux - 15, ux + 25], qtyRng = [qx - 15, qx + 40];
 
     let lastTop = null;
@@ -157,6 +193,8 @@ export async function parseTender(pdfData, onProgress) {
           offer_ref: attrs.Offerte || "",
           airflow_hint_m3h: attrs.airflow ?? systemAirflow ?? null,
           source_page: pno,
+          // where the quantity line is: [x0, top, x1, baseline] in points from the top-left
+          bbox: [r1(ws[0].x0), r1(ws[0].top), r1(ws.at(-1).x1), r1(Math.max(...ws.map((w) => w.base)))],
           extraction_status: qty != null ? "extracted" : "insufficient_information",
           warning: warn,
         });

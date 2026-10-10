@@ -1,0 +1,57 @@
+product_id,category,subcategory,manufacturer,model,description,unit,list_price_chf,discount_pct,net_cost_chf,install_code,source_type,supplier_quote_required
+P-AIR-001,Air terminal,Supply valve,DemoVent,DV-Z-100,Supply air valve DN100,pc,85,12,74.8,DIFFUSER,catalog,false
+P-AIR-002,Air terminal,Supply valve,DemoVent,DV-Z-125,Supply air valve DN125,pc,98,12,86.24,DIFFUSER,catalog,false
+P-AIR-003,Air terminal,Exhaust valve,DemoVent,DV-A-100,Exhaust air valve DN100,pc,82,12,72.16,DIFFUSER,catalog,false
+P-FIR-001,Fire protection,Fire damper,DemoFire,FD-EI90-100,Fire damper EI90-S DN100 with actuator,pc,1750,15,1487.5,FIRE_DAMPER,catalog,false
+P-DAM-001,Damper,Manual damper,DemoDuct,MD-125,Manual balancing damper DN125,pc,145,10,130.5,DAMPER,catalog,false
+P-SIL-001,Silencer,Rectangular,DemoAcoustic,RS-400-300-1250,Rectangular silencer 400x300x1250 mm,pc,2600,0,2600.0,SILENCER,supplier_package,true
+P-VAV-001,Flow controller,VAV rectangular,DemoControl,VAV-500-300,VAV controller 500x300 mm with actuator,pc,4200,0,4200.0,VAV_CONTROLLER,supplier_package,true
+P-CAV-001,Flow controller,CAV circular,DemoControl,CAV-250,Constant volume controller DN250,pc,980,12,862.4,CAV_CONTROLLER,catalog,false
+P-SIL-002,Silencer,Compact,DemoAcoustic,CS-100-900,Compact silencer DN100 length 900 mm,pc,410,10,369.0,SILENCER,catalog,false
+P-SIL-003,Silencer,Rectangular,DemoAcoustic,RS-600-600-1750,Rectangular silencer 600x600x1750 mm,pc,5400,0,5400.0,SILENCER,supplier_package,true
+P-SIL-004,Silencer,Rectangular,DemoAcoustic,RS-540-400-1250,Rectangular silencer 540x400x1250 mm,pc,3600,0,3600.0,SILENCER,supplier_package,true
+P-VAV-002,Flow controller,VAV rectangular,DemoControl,VAV-300-200,VAV controller 300x200 mm,pc,3100,0,3100.0,VAV_CONTROLLER,supplier_package,true
+P-VAV-003,Flow controller,VAV circular,DemoControl,VAV-125,Variable volume controller DN125,pc,1450,12,1276.0,VAV_CONTROLLER,catalog,false
+P-VAV-004,Flow controller,VAV circular,DemoControl,VAV-160,Variable volume controller DN160,pc,1620,12,1425.6,VAV_CONTROLLER,catalog,false
+P-VAV-005,Flow controller,VAV circular,DemoControl,VAV-200,Variable volume controller DN200,pc,1880,12,1654.4,VAV_CONTROLLER,catalog,false
+P-INS-001,Insulation,Thermal 30 mm,DemoInsulation,MW-30,30 mm mineral wool duct insulation,m2,55,8,50.6,INSULATION_30,catalog,false
+P-INS-002,Insulation,Thermal 60 mm,DemoInsulation,MW-60,60 mm mineral wool duct insulation,m2,78,8,71.76,INSULATION_60,catalog,false
+P-INS-003,Insulation,Weatherproof 100 mm,DemoInsulation,MW-100-SS,100 mm external insulation with cladding,m2,245,0,245.0,INSULATION_EXT,supplier_package,true
+P-FIR-002,Fire protection,Rectangular seal,DemoFire,FS-R-300-200,EI30 rectangular fire seal 300x200 mm,pc,820,10,738.0,FIRE_SEAL_RECT,catalog,false
+P-FIR-003,Fire protection,Circular seal,DemoFire,FS-C-160,EI30 circular fire seal DN160,pc,510,10,459.0,FIRE_SEAL_ROUND,catalog,false
+P-SUP-001,Support,Angle set,DemoMount,CAS-50,Connection-angle set,pc,95,10,85.5,SUPPORT_SET,catalog,false
+P-FIR-004,Fire protection,Inspection cover,DemoFire,IC-400-200,Inspection cover 400x200 mm,pc,390,10,351.0,FIRE_ACCESS,catalog,false
+P-DCT-R-100,Ductwork,Circular duct,DemoDuct,SP-100,Circular galvanized duct DN100,m,22,10,19.8,DUCT_ROUND,catalog,false
+P-DCT-R-125,Ductwork,Circular duct,DemoDuct,SP-125,Circular galvanized duct DN125,m,28,10,25.2,DUCT_ROUND,catalog,false
+P-DCT-R-160,Ductwork,Circular duct,DemoDuct,SP-160,Circular galvanized duct DN160,m,37,10,33.3,DUCT_ROUND,catalog,false
+P-DCT-R-200,Ductwork,Circular duct,DemoDuct,SP-200,Circular galvanized duct DN200,m,49,10,44.1,DUCT_ROUND,catalog,false
+P-DCT-R-224,Ductwork,Circular duct,DemoDuct,SP-224,Circular galvanized duct DN224,m,56,10,50.4,DUCT_ROUND,catalog,false
+P-DCT-R-250,Ductwork,Circular duct,DemoDuct,SP-250,Circular galvanized duct DN250,m,68,10,61.2,DUCT_ROUND,catalog,false
+P-DCT-R-315,Ductwork,Circular duct,DemoDuct,SP-315,Circular galvanized duct DN315,m,92,10,82.8,DUCT_ROUND,catalog,false
+P-DCT-R-400,Ductwork,Circular duct,DemoDuct,SP-400,Circular galvanized duct DN400,m,128,10,115.2,DUCT_ROUND,catalog,false
+P-FTG-B-100-90,Ductwork,Circular bend,DemoDuct,B90-100,Circular bend 90° DN100,pc,48,10,43.2,DUCT_FITTING,catalog,false
+P-FTG-B-125-30,Ductwork,Circular bend,DemoDuct,B30-125,Circular bend 30° DN125,pc,45,10,40.5,DUCT_FITTING,catalog,false
+P-FTG-B-125-90,Ductwork,Circular bend,DemoDuct,B90-125,Circular bend 90° DN125,pc,58,10,52.2,DUCT_FITTING,catalog,false
+P-FTG-B-160-45,Ductwork,Circular bend,DemoDuct,B45-160,Circular bend 45° DN160,pc,72,10,64.8,DUCT_FITTING,catalog,false
+P-FTG-B-160-90,Ductwork,Circular bend,DemoDuct,B90-160,Circular bend 90° DN160,pc,84,10,75.6,DUCT_FITTING,catalog,false
+P-FTG-B-200-90,Ductwork,Circular bend,DemoDuct,B90-200,Circular bend 90° DN200,pc,112,10,100.8,DUCT_FITTING,catalog,false
+P-FTG-B-224-90,Ductwork,Circular bend,DemoDuct,B90-224,Circular bend 90° DN224,pc,126,10,113.4,DUCT_FITTING,catalog,false
+P-FTG-B-250-90,Ductwork,Circular bend,DemoDuct,B90-250,Circular bend 90° DN250,pc,145,10,130.5,DUCT_FITTING,catalog,false
+P-DCT-X-200x200,Ductwork,Rectangular duct,DemoDuct,RD-200x200,Rectangular galvanized duct 200x200 mm,m2,68,10,61.2,DUCT_RECT,catalog,false
+P-DCT-X-400x200,Ductwork,Rectangular duct,DemoDuct,RD-400x200,Rectangular galvanized duct 400x200 mm,m2,96,10,86.4,DUCT_RECT,catalog,false
+P-DCT-X-600x400,Ductwork,Rectangular duct,DemoDuct,RD-600x400,Rectangular galvanized duct 600x400 mm,m2,134,10,120.6,DUCT_RECT,catalog,false
+P-DCT-X-800x600,Ductwork,Rectangular duct,DemoDuct,RD-800x600,Rectangular galvanized duct 800x600 mm,m2,188,10,169.2,DUCT_RECT,catalog,false
+P-DCT-X-1000x800,Ductwork,Rectangular duct,DemoDuct,RD-1000x800,Rectangular galvanized duct 1000x800 mm,m2,245,10,220.5,DUCT_RECT,catalog,false
+P-AHU-1000,Equipment,Air-handling unit,DemoAHU,AHU-1000,Modular AHU approx. 1000 m3/h,pc,28000,0,28000.0,AHU_LARGE,supplier_package,true
+P-AHU-3500,Equipment,Air-handling unit,DemoAHU,AHU-3500,Modular AHU approx. 3500 m3/h,pc,62000,0,62000.0,AHU_LARGE,supplier_package,true
+P-AHU-6200,Equipment,Air-handling unit,DemoAHU,AHU-6200,Modular AHU approx. 6200 m3/h,pc,98000,0,98000.0,AHU_LARGE,supplier_package,true
+P-AHU-10500,Equipment,Air-handling unit,DemoAHU,AHU-10500,Modular AHU approx. 10500 m3/h,pc,185000,0,185000.0,AHU_LARGE,supplier_package,true
+P-FAN-500,Equipment,Fan,DemoFan,FAN-500,EC fan unit approx. 500 m3/h,pc,1900,0,1900.0,FAN,supplier_package,true
+P-FAN-1500,Equipment,Fan,DemoFan,FAN-1500,EC fan unit approx. 1500 m3/h,pc,4300,0,4300.0,FAN,supplier_package,true
+P-FAN-3500,Equipment,Fan,DemoFan,FAN-3500,EC fan unit approx. 3500 m3/h,pc,7800,0,7800.0,FAN,supplier_package,true
+P-FAN-6200,Equipment,Fan,DemoFan,FAN-6200,EC fan unit approx. 6200 m3/h,pc,12500,0,12500.0,FAN,supplier_package,true
+P-FAN-10500,Equipment,Fan,DemoFan,FAN-10500,EC fan unit approx. 10500 m3/h,pc,19800,0,19800.0,FAN,supplier_package,true
+P-CTL-001,Controls,Field device,DemoControls,CTL-001,Differential pressure transmitter,pc,680,10,612.0,CONTROL_POINT,catalog,false
+P-CTL-002,Controls,Field device,DemoControls,CTL-002,Temperature sensor,pc,420,10,378.0,CONTROL_POINT,catalog,false
+P-CTL-003,Controls,Field device,DemoControls,CTL-003,Actuator 24V,pc,520,10,468.0,CONTROL_POINT,catalog,false
+P-CTL-004,Controls,Field device,DemoControls,CTL-004,Volume flow transmitter,pc,740,10,666.0,CONTROL_POINT,catalog,false

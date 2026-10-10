@@ -1,11 +1,13 @@
-// Rule-based matching of extracted (German) LV positions to catalogue items / supplier packages.
+// Rule-based matching of extracted (German, HVAC/ventilation) LV positions to catalogue items and
+// supplier packages. Used by the built-in browser engine; a backend can replace it (js/backend.js).
+// Rules key on German trade terms and size notations (Ø, B x H, DN, MS-F/…), and look products
+// up by catalog.csv subcategory, so they work with any catalogue that uses the same subcategories.
 //
 // Each position gets:
 //   category, install_code, matched_product_id (or null), status, match_confidence, match_note
 // Status meanings (README): calculated | supplier_quote_required | assumption_applied |
 //   review_required | insufficient_information | out_of_scope | non_priceable
 // Confidence: 0.92 exact catalogue match, 0.72 exact supplier package, lower = assumption.
-import { VERIFIED_POSITIONS } from "./reference.js";
 
 const CONF = { exact: 0.92, package: 0.72, near: 0.65, weak: 0.5 };
 
@@ -263,24 +265,4 @@ export function matchPosition(pos, catalog) {
     res = { ...res, status: "insufficient_information", match_note: `No quantity in the tender. ${res.match_note || ""}`.trim() };
   }
   return res;
-}
-
-/**
- * Link extracted positions to the verified examples (example_lv_positions.csv): same page and
- * quantity, and the same proposed product (first pass) or install code (second pass).
- * Returns Map(extracted lv_id -> verified row).
- */
-export function linkVerified(items) {
-  const links = new Map(), used = new Set();
-  const pass = (same) => {
-    for (const v of VERIFIED_POSITIONS) {
-      if (used.has(v.lv_id)) continue;
-      const it = items.find(({ pos, match }) => !links.has(pos.lv_id)
-        && pos.source_page === v.source_page && pos.quantity === v.quantity && same(v, match));
-      if (it) { links.set(it.pos.lv_id, v); used.add(v.lv_id); }
-    }
-  };
-  pass((v, m) => m.matched_product_id === v.suggested_product_id);
-  pass((v, m) => m.install_code === v.expected_install_code);
-  return links;
 }

@@ -1,0 +1,37 @@
+BIDWISE AI relay - deploy (about 10 minutes, free, no credit card)
+==================================================================
+
+1. Gemini key
+   https://aistudio.google.com -> sign in with Google -> "Get API key" -> Create API key.
+   Free tier: limited requests per day; Google may use free-tier inputs to improve its models,
+   so use demo data, not confidential prices.
+
+2. Cloudflare Worker
+   https://dash.cloudflare.com -> sign up (free).
+   Workers & Pages -> Create -> Create Worker -> name "bidwise-ai" -> Deploy.
+   "Edit code" -> delete everything -> paste the contents of ai-relay/worker.js -> Deploy.
+
+3. Settings -> Variables and Secrets -> Add:
+   GEMINI_API_KEY   type "Secret"   = the key from step 1
+   (optional) GEMINI_MODELS         = comma-separated model chain, tried in order. Default:
+              gemini-2.5-flash,gemini-2.5-flash-lite,gemini-flash-latest,gemini-flash-lite-latest,gemini-2.0-flash,gemini-2.0-flash-lite
+              (if you set the older GEMINI_MODEL variable, that model is tried first)
+              When one model's free allowance is used up, the next one answers; the used-up model
+              rests until Google renews it (per-minute limits: seconds; daily limits: midnight
+              Pacific time) and is then used first again. Retired models are skipped automatically.
+   (optional) ALLOWED_ORIGINS       = default "https://dhinu78.github.io,http://localhost:5500"
+   Deploy again.
+
+4. Copy the Worker URL, e.g. https://bidwise-ai.<your-subdomain>.workers.dev
+   Put it in docs/js/ai.js:   export const AI_RELAY_URL = "https://bidwise-ai.<your-subdomain>.workers.dev";
+   The "Ask AI" button then appears for every signed-in user with an open project.
+
+Check: open https://bidwise-ai.<your-subdomain>.workers.dev/chat in a browser -> {"error":"not_found"}
+(GET is not used; this only shows the Worker is live). In the app, click "Ask AI" -> "What should I do next?".
+
+Topic limit: worker.js always puts its own rules first ("only this tender and the bid in BIDWISE");
+off-topic questions (e.g. a cake recipe) get a one-line refusal. After changing worker.js, paste it
+into the Cloudflare editor again and Deploy.
+
+When the free allowance of every model in the chain is used up, the chat shows a "prototype, free credits used up" notice with the time the first model is back;
+everything else keeps working. Logs: Cloudflare dashboard -> Worker -> Logs.
