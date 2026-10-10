@@ -1,0 +1,1 @@
+{ "version": "0.0.1", "configurations": [ { "name": "bidwise", "runtimeExecutable": "python", "runtimeArgs": ["-m", "http.server", "5500", "--bind", "127.0.0.1"], "port": 5500 } ] }

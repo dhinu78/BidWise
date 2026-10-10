@@ -10,6 +10,10 @@ export const firebaseConfig = {
     measurementId: "G-F83RPJ8WSY"
   };
 
+// Firestore database ID (Firebase console -> Firestore Database -> the name in the database picker).
+// The web SDK uses "(default)" unless told otherwise.
+export const FIRESTORE_DATABASE_ID = "bidwise";
+
 // Optional: only allow Google accounts from these domains, e.g. ["equans.ch"]. Empty = any account.
 // (Enforce it in firestore.rules / storage.rules too; this check alone is only cosmetic.)
 export const ALLOWED_EMAIL_DOMAINS = [];

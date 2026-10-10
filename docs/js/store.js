@@ -20,12 +20,12 @@ import {
 import {
   getStorage, ref, uploadBytes, getBlob, getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-import { firebaseConfig, ALLOWED_EMAIL_DOMAINS } from "./firebase-config.js";
+import { firebaseConfig, ALLOWED_EMAIL_DOMAINS, FIRESTORE_DATABASE_ID } from "./firebase-config.js";
 import { KINDS, safeFilename } from "./validate.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
+const db = initializeFirestore(app, { ignoreUndefinedProperties: true }, FIRESTORE_DATABASE_ID || "(default)");
 const storage = getStorage(app);
 
 const now = () => new Date().toISOString();
