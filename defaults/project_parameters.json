@@ -1,0 +1,64 @@
+{
+  "schema_version": "2.0",
+  "project": {
+    "id": "OBERGLATT_LUEFTUNG_DEMO",
+    "name": "Primary School Oberglatt - Ventilation",
+    "currency": "CHF",
+    "source_tender_file": "BKP_244_LV_Lueftung_260804.pdf"
+  },
+  "productivity_factors": {
+    "site_efficiency": 0.88,
+    "school_logistics": 1.07,
+    "mounting_height_school": 1.1,
+    "mounting_height_sports_hall": 1.25,
+    "timber_interface": 1.08
+  },
+  "allowances": {
+    "material_waste_pct": 4.0,
+    "small_material_pct": 3.5,
+    "transport_equipment_pct": 2.5,
+    "supplier_package_contingency_pct": 3.0
+  },
+  "project_costs": {
+    "engineering_hours": 420,
+    "engineering_rate_chf_per_h": 145,
+    "commissioning_hours": 160,
+    "commissioning_rate_chf_per_h": 155,
+    "hygiene_inspection_chf": 18000,
+    "documentation_chf": 12000
+  },
+  "commercial": {
+    "overhead_pct": 8.5,
+    "target_margin_pct": 5.5,
+    "round_to_chf": 1000
+  },
+  "stretch_bid_optimization": {
+    "enabled": true,
+    "output_name": "Recommended Bid Range",
+    "scenario_names": [
+      "Aggressive",
+      "Target",
+      "Conservative"
+    ],
+    "reference_win_probability": 0.55,
+    "price_sensitivity_probability_points_per_1pct_price": 0.05,
+    "strategic_appetite_adjustment": 0.05,
+    "competition_adjustment": -0.05,
+    "minimum_probability": 0.05,
+    "maximum_probability": 0.95,
+    "scenario_margins_pct": {
+      "Aggressive": 2.5,
+      "Target": 4.0,
+      "Conservative": 6.5
+    },
+    "model_inputs": [
+      "historical_bids",
+      "similar_projects",
+      "relative_price_position",
+      "competitive_intensity",
+      "client_price_sensitivity",
+      "strategic_appetite",
+      "available_capacity"
+    ]
+  }
+}
