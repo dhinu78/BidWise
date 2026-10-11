@@ -16,7 +16,7 @@ export const CATEGORY = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 
 // Statuses a user can set on a position (detailed summary -> Edit).
 export const STATUSES = [
-  ["calculated", "Calculated"], ["assumption_applied", "Assumption applied"],
+  ["calculated", "Perfectly matched (confirmed)"], ["assumption_applied", "Assumption applied"],
   ["supplier_quote_required", "Supplier quote required"], ["review_required", "Review required"],
   ["insufficient_information", "Insufficient information"], ["non_priceable", "Non-priceable"],
 ];
@@ -77,6 +77,8 @@ export function breakdown(view) {
     // every position of the bill (each has its own outcome, non-priceable ones included); not the
     // stored kpis.priceable_positions, which older versions counted without the non-priceable ones
     priceable: total || null,
-    materials: k.materials_found ?? (total ? pos.filter((p) => p.matched_product_id).length : null),
+    // positions shown as Perfectly Matched (catalogue matches and prices the user confirmed); counted
+    // from the positions, so edits and older versions show the current number
+    materials: total ? counts.perfectly_matched : null,
   };
 }

@@ -13,7 +13,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "Zuluftgerät 1-1 | Zuluftgerät 1-1",
   "votes": {
-   "Equipment|Air-handling unit|Supply air unit 1-1": 13
+   "Equipment|Air-handling unit|Supply air unit 1-1": 24
   }
  },
  {
@@ -30,7 +30,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 Leerteil | 1 Leerteil",
   "votes": {
-   "Equipment|AHU section|Empty AHU casing section (Leerteil)": 13
+   "Equipment|AHU section|Empty AHU casing section (Leerteil)": 24
   }
  },
  {
@@ -47,8 +47,8 @@
   "install_code": "AHU_LARGE",
   "example_de": "Fortluft 1-2 | Fortluft 1-2",
   "votes": {
-   "Equipment|AHU section|Exhaust air AHU section": 13,
-   "Equipment|Air-handling unit|Air-handling unit Fortluft 2-2": 13
+   "Equipment|AHU section|Exhaust air AHU section": 24,
+   "Equipment|Air-handling unit|Air-handling unit Fortluft 2-2": 24
   }
  },
  {
@@ -65,7 +65,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Hilfsmaterial | Kanaldichtheitsprüfung | Nachweis dem Bericht beilegen",
   "votes": {
-   "Service|Testing|Duct tightness test": 13
+   "Service|Testing|Duct tightness test": 24
   }
  },
  {
@@ -78,7 +78,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Regenhut | B x H 110 x 35 cm",
   "votes": {
-   "Air terminal|Weather louvre|Rain hood": 13
+   "Air terminal|Weather louvre|Rain hood": 24
   }
  },
  {
@@ -94,8 +94,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Regenhut | exkl. Sonderfarbzuschlag",
   "votes": {
-   "Air terminal|Option|Rain hood": 13,
-   "Equipment|Option|Paint coating according to NCS": 13
+   "Air terminal|Option|Rain hood": 24,
+   "Equipment|Option|Paint coating according to NCS": 24
   }
  },
  {
@@ -112,7 +112,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Aussenluft Säulen-Lamellenhut | Standrohr matt gebeizt und passiviert!",
   "votes": {
-   "Air terminal|Weather louvre|Column louvre hood": 13
+   "Air terminal|Weather louvre|Column louvre hood": 24
   }
  },
  {
@@ -129,7 +129,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Aussenluft Säulen-Lamellenhut | matt gebeizt und passiviert!",
   "votes": {
-   "Air terminal|Weather louvre|Base (sockel) pipe": 13
+   "Air terminal|Weather louvre|Base (sockel) pipe": 24
   }
  },
  {
@@ -145,7 +145,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Aussenluft Säulen-Lamellenhut | exkl. Sonderfarbzuschlag",
   "votes": {
-   "Air terminal|Option|Column louvre hood": 13
+   "Air terminal|Option|Column louvre hood": 24
   }
  },
  {
@@ -162,9 +162,9 @@
   "install_code": "DIFFUSER",
   "example_de": "Zuluft - Tellerventil | Grösse Ø 10 cm",
   "votes": {
-   "Air terminal|Supply valve|Disc supply valve": 26,
-   "Air terminal|Supply valve|Supply air disc valve": 39,
-   "Air terminal|Supply valve|Supply air disc valve DN100": 13
+   "Air terminal|Supply valve|Disc supply valve": 48,
+   "Air terminal|Supply valve|Supply air disc valve": 72,
+   "Air terminal|Supply valve|Supply air disc valve DN100": 24
   }
  },
  {
@@ -181,9 +181,9 @@
   "install_code": "DIFFUSER",
   "example_de": "Abluft - Tellerventil | Grösse Ø 10 cm",
   "votes": {
-   "Air terminal|Exhaust valve|Exhaust air disc valve DN100": 26,
-   "Air terminal|Exhaust valve|Exhaust air disc valve DN125": 13,
-   "Air terminal|Exhaust valve|Exhaust air disc valve": 52
+   "Air terminal|Exhaust valve|Exhaust air disc valve DN100": 48,
+   "Air terminal|Exhaust valve|Exhaust air disc valve DN125": 24,
+   "Air terminal|Exhaust valve|Exhaust air disc valve": 96
   }
  },
  {
@@ -200,7 +200,7 @@
   "install_code": "FIRE_DAMPER",
   "example_de": "Brandschutzklappen eingemauert | Grösse (B x H) 10 Ø cm",
   "votes": {
-   "Fire protection|Fire damper|Built-in fire damper EI90-S DN100": 13
+   "Fire protection|Fire damper|Built-in fire damper EI90-S DN100": 24
   }
  },
  {
@@ -217,7 +217,7 @@
   "install_code": "DUCT_FITTING",
   "example_de": "Einseitig Dehnungsmanschette mit Potentialausgleich | Grösse (B x H) 10 Ø cm",
   "votes": {
-   "Ductwork|Fitting|One-sided expansion sleeve with potential equalization DN100": 13
+   "Ductwork|Fitting|One-sided expansion sleeve with potential equalization DN100": 24
   }
  },
  {
@@ -234,7 +234,7 @@
   "install_code": "DAMPER",
   "example_de": "Drosselklappen | Grösse Ø 12.5 cm",
   "votes": {
-   "Damper|Manual damper|Throttle damper": 26
+   "Damper|Manual damper|Throttle damper": 48
   }
  },
  {
@@ -251,8 +251,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Schalldämpfer | Druckverlust 30Pa",
   "votes": {
-   "Silencer|Rectangular|Rectangular silencer": 91,
-   "Silencer|Rectangular|Rectangular silencer 900x600x1250 mm": 13
+   "Silencer|Rectangular|Rectangular silencer": 168,
+   "Silencer|Rectangular|Rectangular silencer 900x600x1250 mm": 24
   }
  },
  {
@@ -268,7 +268,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Zuluftgitter | Grösse (B x H) 25 x 10 cm",
   "votes": {
-   "Air terminal|Grille|Supply air grille": 13
+   "Air terminal|Grille|Supply air grille": 24
   }
  },
  {
@@ -284,8 +284,8 @@
   "install_code": "DIFFUSER",
   "example_de": "Abluftgitter | Grösse (B x H) 25 x 10 cm",
   "votes": {
-   "Air terminal|Grille|Exhaust air grille": 13,
-   "Air terminal|Exhaust valve|Exhaust air grille": 13
+   "Air terminal|Grille|Exhaust air grille": 24,
+   "Air terminal|Exhaust valve|Exhaust air grille": 24
   }
  },
  {
@@ -302,9 +302,9 @@
   "install_code": "FIRE_ACCESS",
   "example_de": "Kontroll- und Putzdeckel | Grösse 40 x 20 cm",
   "votes": {
-   "Fire protection|Inspection cover|Inspection cover 400x200 mm": 13,
-   "Fire protection|Inspection cover|Inspection cover": 39,
-   "Fire protection|Inspection cover|Inspection and cleaning cover 400x200 mm": 13
+   "Fire protection|Inspection cover|Inspection cover 400x200 mm": 24,
+   "Fire protection|Inspection cover|Inspection cover": 72,
+   "Fire protection|Inspection cover|Inspection and cleaning cover 400x200 mm": 24
   }
  },
  {
@@ -321,7 +321,7 @@
   "install_code": "FIRE_ACCESS",
   "example_de": "Kontroll- und Putzdeckel | Grösse 10 Ø cm",
   "votes": {
-   "Fire protection|Inspection cover|Inspection cover DN100": 13
+   "Fire protection|Inspection cover|Inspection cover DN100": 24
   }
  },
  {
@@ -337,7 +337,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Zeigerthermometer | für Kanaleinbau",
   "votes": {
-   "Controls|Temperature sensor|Dial thermometer for duct installation": 65
+   "Controls|Temperature sensor|Dial thermometer for duct installation": 120
   }
  },
  {
@@ -354,9 +354,9 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Zeigerthermometer | Montagerahmen für isolierte Kanäle",
   "votes": {
-   "Controls|Field device|Mounting frame for insulated ducts for dial thermometer": 39,
-   "Support|Support|Mounting frame for insulated ducts for dial thermometer": 13,
-   "Support|Support|Mounting frame for insulated ducts": 13
+   "Controls|Field device|Mounting frame for insulated ducts for dial thermometer": 72,
+   "Support|Support|Mounting frame for insulated ducts for dial thermometer": 24,
+   "Support|Support|Mounting frame for insulated ducts": 24
   }
  },
  {
@@ -371,10 +371,10 @@
   "install_code": "UNKNOWN",
   "example_de": "Bezeichnungsschilder | 100 x 50 mm",
   "votes": {
-   "Other|Labelling|Identification label 100x50 mm": 13,
-   "Other|Labelling|Identification plate 100x50 mm": 26,
-   "Other|Labelling|Label plate 100x50 mm": 13,
-   "Other|Labelling|Designation label plate": 13
+   "Other|Labelling|Identification label 100x50 mm": 24,
+   "Other|Labelling|Identification plate 100x50 mm": 48,
+   "Other|Labelling|Label plate 100x50 mm": 24,
+   "Other|Labelling|Designation label plate": 24
   }
  },
  {
@@ -390,7 +390,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Farbpfeile | Farbpfeile",
   "votes": {
-   "Other|Labelling|Colour arrow sticker 150x30 mm": 13
+   "Other|Labelling|Colour arrow sticker 150x30 mm": 24
   }
  },
  {
@@ -407,9 +407,9 @@
   "install_code": "UNKNOWN",
   "example_de": "Potentialverbindung | Potentialverbindung",
   "votes": {
-   "Service|Labour|Potential bonding connection kit": 13,
-   "Other|Potential bonding|Potential bonding connection kit for ducts (connections between non-conductive materials": 13,
-   "Other|Potential connection|Potential bonding connection kit for non-conductive materials (e.g. sleeve)": 13
+   "Service|Labour|Potential bonding connection kit": 24,
+   "Other|Potential bonding|Potential bonding connection kit for ducts (connections between non-conductive materials": 24,
+   "Other|Potential connection|Potential bonding connection kit for non-conductive materials (e.g. sleeve)": 24
   }
  },
  {
@@ -426,10 +426,10 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Lieferung und Einbau der folgenden Feldgeräte in die In- stallation. | Drehantrieb, 20 Nm, | Drehantrieb, 20 Nm,",
   "votes": {
-   "Controls|Actuator|Rotary actuator": 26,
-   "Controls|Actuator|Rotary actuator 20 Nm": 13,
-   "Controls|Actuator|Rotary actuator 5 Nm": 13,
-   "Controls|Actuator 24V|Rotary actuator 20 Nm": 13
+   "Controls|Actuator|Rotary actuator": 48,
+   "Controls|Actuator|Rotary actuator 20 Nm": 24,
+   "Controls|Actuator|Rotary actuator 5 Nm": 24,
+   "Controls|Actuator 24V|Rotary actuator 20 Nm": 24
   }
  },
  {
@@ -446,7 +446,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Kanalrauchmelder | Kanalrauchmelder",
   "votes": {
-   "Controls|Field device|Duct smoke detector": 65
+   "Controls|Field device|Duct smoke detector": 120
   }
  },
  {
@@ -463,8 +463,8 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Druckwächter",
   "votes": {
-   "Controls|Field device|Pressure switch (pressure monitor)": 39,
-   "Controls|Field device|Pressure switch (pressure monitor) for duct/system": 13
+   "Controls|Field device|Pressure switch (pressure monitor)": 72,
+   "Controls|Field device|Pressure switch (pressure monitor) for duct/system": 24
   }
  },
  {
@@ -481,9 +481,9 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Frostschutzwächter, 2-Punkt",
   "votes": {
-   "Controls|Field device|Frost protection thermostat": 13,
-   "Controls|Field device|Freeze protection switch": 13,
-   "Controls|Field device|Frost protection switch": 26
+   "Controls|Field device|Frost protection thermostat": 24,
+   "Controls|Field device|Freeze protection switch": 24,
+   "Controls|Field device|Frost protection switch": 48
   }
  },
  {
@@ -500,7 +500,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Kanaltemperaturfühler",
   "votes": {
-   "Controls|Temperature sensor|Duct temperature sensor": 13
+   "Controls|Temperature sensor|Duct temperature sensor": 24
   }
  },
  {
@@ -517,10 +517,10 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Druckdifferenzfühler",
   "votes": {
-   "Controls|Differential pressure transmitter|Differential pressure sensor / transmitter": 13,
-   "Controls|Differential pressure transmitter|Differential pressure transmitter": 13,
-   "Controls|Differential pressure transmitter|Differential pressure transmitter / sensor": 13,
-   "Controls|Differential pressure transmitter|Differential pressure sensor / transmitter for duct": 13
+   "Controls|Differential pressure transmitter|Differential pressure sensor / transmitter": 24,
+   "Controls|Differential pressure transmitter|Differential pressure transmitter": 24,
+   "Controls|Differential pressure transmitter|Differential pressure transmitter / sensor": 24,
+   "Controls|Differential pressure transmitter|Differential pressure sensor / transmitter for duct": 24
   }
  },
  {
@@ -537,10 +537,10 @@
   "install_code": "UNKNOWN",
   "example_de": "Hygiene-Nachweis für Transport, Montage, Montage Etapp- | Aller notwenigen Laboranalysen, Mess-und Kontrollöffnungen.",
   "votes": {
-   "Service|Hygiene|Hygiene certificate service": 13,
-   "Service|Hygiene|Hygiene certificate and initial hygiene inspection": 13,
-   "Service|Hygiene|Hygiene verification and initial inspection": 13,
-   "Service|Hygiene|Hygiene proof with all necessary laboratory analyses": 13
+   "Service|Hygiene|Hygiene certificate service": 24,
+   "Service|Hygiene|Hygiene certificate and initial hygiene inspection": 24,
+   "Service|Hygiene|Hygiene verification and initial inspection": 24,
+   "Service|Hygiene|Hygiene proof with all necessary laboratory analyses": 24
   }
  },
  {
@@ -557,9 +557,9 @@
   "install_code": "UNKNOWN",
   "example_de": "Thermische Aussendämmung 60/10 | mit Alu-Folie, gestiftet",
   "votes": {
-   "Insulation|Thermal 60 mm|Thermal external insulation 60 mm": 13,
-   "Insulation|Thermal 30 mm|External duct insulation": 13,
-   "Insulation|Thermal 30 mm|30 mm mineral wool duct insulation": 13
+   "Insulation|Thermal 60 mm|Thermal external insulation 60 mm": 24,
+   "Insulation|Thermal 30 mm|External duct insulation": 24,
+   "Insulation|Thermal 30 mm|30 mm mineral wool duct insulation": 24
   }
  },
  {
@@ -576,14 +576,14 @@
   "install_code": "UNKNOWN",
   "example_de": "Thermische Aussendämmung 100/15 | mit Alu-Folie, gestiftet",
   "votes": {
-   "Insulation|Weatherproof 100 mm|Thermal external insulation 100 mm": 13,
-   "Insulation|Thermal 30 mm|External thermal insulation 30 mm": 13,
-   "Insulation|Thermal 60 mm|External thermal insulation 60 mm": 13,
-   "Insulation|Weatherproof 100 mm|External thermal insulation 100 mm": 13,
-   "Insulation|Thermal 60 mm|External duct insulation": 13,
-   "Insulation|Weatherproof 100 mm|External duct insulation": 13,
-   "Insulation|Thermal 60 mm|60 mm mineral wool duct insulation": 13,
-   "Insulation|Thermal 100 mm|100 mm mineral wool duct insulation": 13
+   "Insulation|Weatherproof 100 mm|Thermal external insulation 100 mm": 24,
+   "Insulation|Thermal 30 mm|External thermal insulation 30 mm": 24,
+   "Insulation|Thermal 60 mm|External thermal insulation 60 mm": 24,
+   "Insulation|Weatherproof 100 mm|External thermal insulation 100 mm": 24,
+   "Insulation|Thermal 60 mm|External duct insulation": 24,
+   "Insulation|Weatherproof 100 mm|External duct insulation": 24,
+   "Insulation|Thermal 60 mm|60 mm mineral wool duct insulation": 24,
+   "Insulation|Thermal 100 mm|100 mm mineral wool duct insulation": 24
   }
  },
  {
@@ -600,10 +600,10 @@
   "install_code": "UNKNOWN",
   "example_de": "Kanal-Aussendämmung | Wand- und Deckendurchführungen",
   "votes": {
-   "Insulation|Insulation|Duct external insulation 15 mm": 26,
-   "Insulation|Insulation|Duct external insulation": 13,
-   "Insulation|Insulation|15 mm mineral wool duct insulation": 13,
-   "Insulation|Insulation|Duct wall and ceiling penetration insulation": 13
+   "Insulation|Insulation|Duct external insulation 15 mm": 48,
+   "Insulation|Insulation|Duct external insulation": 24,
+   "Insulation|Insulation|15 mm mineral wool duct insulation": 24,
+   "Insulation|Insulation|Duct wall and ceiling penetration insulation": 24
   }
  },
  {
@@ -620,8 +620,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Brandschutzdämmungen | Aussendämmung EI30 | nach Anforderungen Produktelieferant mit VKF-Zertifizierung",
   "votes": {
-   "Insulation|Fire insulation|External fire insulation EI30": 13,
-   "Insulation|Fire insulation|EI30 external fire insulation": 13
+   "Insulation|Fire insulation|External fire insulation EI30": 24,
+   "Insulation|Fire insulation|EI30 external fire insulation": 24
   }
  },
  {
@@ -638,8 +638,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Durchdringungen durch brandabschnittsbildende Wände und Decken für runde Rohre EI30 | Grösse 16 Ø cm",
   "votes": {
-   "Fire protection|Circular seal|EI30 circular fire seal": 13,
-   "Fire protection|Circular seal|Circular fire seal": 26
+   "Fire protection|Circular seal|EI30 circular fire seal": 24,
+   "Fire protection|Circular seal|Circular fire seal": 48
   }
  },
  {
@@ -656,9 +656,9 @@
   "install_code": "SUPPORT_SET",
   "example_de": "Anschlusswinkle für Befestigung an Wand oder Decke | Anzahl Durchführungen",
   "votes": {
-   "Support|Angle set|Connection angle": 26,
-   "Support|Angle set|Connection angle 50x50x35x2.5 mm": 13,
-   "Support|Angle set|Connection angle for wall or ceiling fastening": 13
+   "Support|Angle set|Connection angle": 48,
+   "Support|Angle set|Connection angle 50x50x35x2.5 mm": 24,
+   "Support|Angle set|Connection angle for wall or ceiling fastening": 24
   }
  },
  {
@@ -675,8 +675,8 @@
   "install_code": "AHU_LARGE",
   "example_de": "Zuluftgerät 2-1 | Zuluftgerät 2-1",
   "votes": {
-   "Equipment|Air-handling unit|Air-handling unit Zuluftgerät 2-1": 13,
-   "Equipment|Air-handling unit|Supply air unit Zuluftgerät 3-1": 13
+   "Equipment|Air-handling unit|Air-handling unit Zuluftgerät 2-1": 24,
+   "Equipment|Air-handling unit|Supply air unit Zuluftgerät 3-1": 24
   }
  },
  {
@@ -693,7 +693,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 Luftkühler-/Lufterhitzerteil (Change-Over-Batterie)",
   "votes": {
-   "Equipment|AHU section|Change-over coil (air cooler / air heater section)": 26
+   "Equipment|AHU section|Change-over coil (air cooler / air heater section)": 48
   }
  },
  {
@@ -710,9 +710,9 @@
   "install_code": "DOCUMENT_SYSTEM",
   "example_de": "Hilfsmaterial | Kanaldichtheitsprüfung | Nachweis dem Bericht beilegen",
   "votes": {
-   "Service|Documentation|Calibration certificates of measurement instruments": 13,
-   "Service|Documentation|Calibration certificates for measuring instruments": 13,
-   "Service|Documentation|Calibration certificate for measuring instruments": 13
+   "Service|Documentation|Calibration certificates of measurement instruments": 24,
+   "Service|Documentation|Calibration certificates for measuring instruments": 24,
+   "Service|Documentation|Calibration certificate for measuring instruments": 24
   }
  },
  {
@@ -729,7 +729,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Ø 250 mm, Rohr, Länge 3m (L132503502) | Ø 250 mm, Rohr, Länge 3m (L132503502)",
   "votes": {
-   "Ductwork|Circular duct|Circular buried duct": 39
+   "Ductwork|Circular duct|Circular buried duct": 72
   }
  },
  {
@@ -746,8 +746,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Ø 250 mm, Bogen 45° (L452503502) | Ø 250 mm, Bogen 45° (L452503502)",
   "votes": {
-   "Ductwork|Circular bend|Circular bend 45°": 13,
-   "Ductwork|Circular bend|Circular bend 90°": 13
+   "Ductwork|Circular bend|Circular bend 45°": 24,
+   "Ductwork|Circular bend|Circular bend 90°": 24
   }
  },
  {
@@ -764,7 +764,7 @@
   "install_code": "DUCT_FITTING",
   "example_de": "Ø 250 mm, Verbindungsmanschette (L052503520) | Ø 250 mm, Verbindungsmanschette (L052503520)",
   "votes": {
-   "Ductwork|Fitting|Connection sleeve": 13
+   "Ductwork|Fitting|Connection sleeve": 24
   }
  },
  {
@@ -781,7 +781,7 @@
   "install_code": "DUCT_FITTING",
   "example_de": "Ø 250 mm, Ringraumdichtung | Ø 250 mm, Ringraumdichtung",
   "votes": {
-   "Ductwork|Fitting|Ring space gasket": 13
+   "Ductwork|Fitting|Ring space gasket": 24
   }
  },
  {
@@ -798,7 +798,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Ø 250 mm  Mauerkragen Baureihe (L032503520) | Ø 250 mm  Mauerkragen Baureihe (L032503520)",
   "votes": {
-   "Fire protection|Circular seal|Wall collar DN250": 13
+   "Fire protection|Circular seal|Wall collar DN250": 24
   }
  },
  {
@@ -815,7 +815,7 @@
   "install_code": "DOCUMENT_SYSTEM",
   "example_de": "Statische Berechnung (223001) | Statische Berechnung (223001)",
   "votes": {
-   "Service|Documentation|Static calculation (structural) for buried ventilation ducts": 13
+   "Service|Documentation|Static calculation (structural) for buried ventilation ducts": 24
   }
  },
  {
@@ -832,7 +832,7 @@
   "install_code": "UNKNOWN",
   "example_de": "VERSANDKOSTEN - Fracht, Verpackung & Handling | VERSANDKOSTEN - Fracht, Verpackung & Handling",
   "votes": {
-   "Service|Transport|Shipping costs — freight": 13
+   "Service|Transport|Shipping costs — freight": 24
   }
  },
  {
@@ -849,7 +849,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kanaldichtheitsprüfung | Nachweis dem Bericht beilegen",
   "votes": {
-   "Service|Testing|Calibration certificate for measurement instruments": 13
+   "Service|Testing|Calibration certificate for measurement instruments": 24
   }
  },
  {
@@ -866,7 +866,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Frontplatte mit Luftführungselementen | Grösse (B x H) 996.x 496 mm",
   "votes": {
-   "Air terminal|Grille|Front plate with air-guiding elements": 13
+   "Air terminal|Grille|Front plate with air-guiding elements": 24
   }
  },
  {
@@ -883,7 +883,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Sichtbare Dekorlochblechverkleidung | Grösse (B x H) 1000.x 500 mm",
   "votes": {
-   "Air terminal|Grille|Decorative perforated sheet cladding": 13
+   "Air terminal|Grille|Decorative perforated sheet cladding": 24
   }
  },
  {
@@ -900,7 +900,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Variabler Volumenstromregler eckig | BM0 50x30 1217 3100 500",
   "votes": {
-   "Flow controller|VAV rectangular|VAV controller BM0": 13
+   "Flow controller|VAV rectangular|VAV controller BM0": 24
   }
  },
  {
@@ -917,10 +917,10 @@
   "install_code": "UNKNOWN",
   "example_de": "Einkanal-Volumenstromregler für konstanten Vol.strom | ....... 250 100 150",
   "votes": {
-   "Flow controller|CAV circular|Constant volume controller DN250": 13,
-   "Flow controller|CAV circular|Constant volume controller VFC": 13,
-   "Flow controller|CAV circular|Constant volume controller VFC DN80": 13,
-   "Flow controller|CAV circular|Constant volume controller VFC 10": 13
+   "Flow controller|CAV circular|Constant volume controller DN250": 24,
+   "Flow controller|CAV circular|Constant volume controller VFC": 24,
+   "Flow controller|CAV circular|Constant volume controller VFC DN80": 24,
+   "Flow controller|CAV circular|Constant volume controller VFC 10": 24
   }
  },
  {
@@ -936,7 +936,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kompaktschalldämpfer | 100 10 28.5x20.5 27",
   "votes": {
-   "Silencer|Compact|Compact silencer DN100": 13
+   "Silencer|Compact|Compact silencer DN100": 24
   }
  },
  {
@@ -951,7 +951,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kompaktschalldämpfer | 50 10 28.5x20.5 27",
   "votes": {
-   "Silencer|Compact|Compact silencer DN100": 13
+   "Silencer|Compact|Compact silencer DN100": 24
   }
  },
  {
@@ -968,7 +968,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kanalschalldämpfer | Druckverlust 21Pa",
   "votes": {
-   "Silencer|Rectangular|Duct silencer 600x600x1750 mm": 13
+   "Silencer|Rectangular|Duct silencer 600x600x1750 mm": 24
   }
  },
  {
@@ -985,7 +985,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kanalschalldämpfer | Druckverlust 31Pa",
   "votes": {
-   "Silencer|Rectangular|Rectangular silencer": 13
+   "Silencer|Rectangular|Rectangular silencer": 24
   }
  },
  {
@@ -1002,9 +1002,9 @@
   "install_code": "FIRE_ACCESS",
   "example_de": "Kontroll- und Putzdeckel | Grösse 40x20 cm",
   "votes": {
-   "Fire protection|Inspection cover|Inspection cover for insulated ducts": 26,
-   "Fire protection|Inspection cover|Inspection and cleaning cover 400x200 mm for insulated ducts": 13,
-   "Fire protection|Inspection cover|Inspection cover for insulated duct": 13
+   "Fire protection|Inspection cover|Inspection cover for insulated ducts": 48,
+   "Fire protection|Inspection cover|Inspection and cleaning cover 400x200 mm for insulated ducts": 24,
+   "Fire protection|Inspection cover|Inspection cover for insulated duct": 24
   }
  },
  {
@@ -1019,10 +1019,10 @@
   "install_code": "UNKNOWN",
   "example_de": "Farbpfeile | Farbpfeile",
   "votes": {
-   "Other|Labelling|Colour direction arrow label (Farbpfeil)": 13,
-   "Other|Labelling|Directional colour arrows (colour arrow labels)": 13,
-   "Other|Labelling|Colour arrow label": 13,
-   "Other|Labelling|Colour arrow (directional arrow sticker)": 13
+   "Other|Labelling|Colour direction arrow label (Farbpfeil)": 24,
+   "Other|Labelling|Directional colour arrows (colour arrow labels)": 24,
+   "Other|Labelling|Colour arrow label": 24,
+   "Other|Labelling|Colour arrow (directional arrow sticker)": 24
   }
  },
  {
@@ -1039,7 +1039,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Kanaltemperatur- und Feuchtefühler",
   "votes": {
-   "Controls|Temperature sensor|Duct temperature and humidity sensor": 39
+   "Controls|Temperature sensor|Duct temperature and humidity sensor": 72
   }
  },
  {
@@ -1056,7 +1056,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Brandschutzdämmungen | Brandschutzverkleidung EI30 | nach Anforderungen Produktelieferant mit VKF-Zertifizierung",
   "votes": {
-   "Fire protection|Fire cladding|EI30 fire protection cladding": 13
+   "Fire protection|Fire cladding|EI30 fire protection cladding": 24
   }
  },
  {
@@ -1073,8 +1073,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Durchdringungen durch brandabschnittsbildende Wände | Kanalverstärkungs-Verbundprofil 110x26mm und Itumes- zierendes Rundporfil 16-39mm EI30 | 500 x 350",
   "votes": {
-   "Fire protection|Rectangular seal|Rectangular fire seal": 39,
-   "Fire protection|Rectangular seal|EI30 rectangular fire seal with reinforcement composite profile 110x26 mm and intumescent round profile 16-39 mm": 13
+   "Fire protection|Rectangular seal|Rectangular fire seal": 72,
+   "Fire protection|Rectangular seal|EI30 rectangular fire seal with reinforcement composite profile 110x26 mm and intumescent round profile 16-39 mm": 24
   }
  },
  {
@@ -1091,8 +1091,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Durchdringungen durch brandabschnittsbildende Decken EI30 | Kanalverstärkungs-Verbundprofil 110x26mm, Itumeszie- rendes Rundporfil 16-39mm und L-Profil Stahl verzinkt 40 x 40x 3mm | 400 x 200",
   "votes": {
-   "Fire protection|Rectangular seal|Rectangular fire seal": 13,
-   "Fire protection|Rectangular seal|EI30 rectangular fire seal with reinforcement composite profile 110x26 mm": 13
+   "Fire protection|Rectangular seal|Rectangular fire seal": 24,
+   "Fire protection|Rectangular seal|EI30 rectangular fire seal with reinforcement composite profile 110x26 mm": 24
   }
  },
  {
@@ -1109,7 +1109,7 @@
   "install_code": "FIRE_ACCESS",
   "example_de": "Revisisondeckel bei BS-Dämmungen | 400 x 300",
   "votes": {
-   "Fire protection|Inspection cover|Inspection cover for BS insulation": 13
+   "Fire protection|Inspection cover|Inspection cover for BS insulation": 24
   }
  },
  {
@@ -1126,7 +1126,7 @@
   "install_code": "UNKNOWN",
   "example_de": "(untitled) | Küche EVS-W-3600x1300x420mm",
   "votes": {
-   "Equipment|Kitchen hood|EVS-W kitchen canopy": 13
+   "Equipment|Kitchen hood|EVS-W kitchen canopy": 24
   }
  },
  {
@@ -1139,8 +1139,8 @@
   "install_code": "DIFFUSER",
   "example_de": "4DQA Alu 1000x500mm oben | 4DQA Alu 1000x500mm oben",
   "votes": {
-   "Air terminal|Diffuser|4DQA diffuser": 13,
-   "Air terminal|Diffuser|DQA diffuser": 13
+   "Air terminal|Diffuser|4DQA diffuser": 24,
+   "Air terminal|Diffuser|DQA diffuser": 24
   }
  },
  {
@@ -1153,7 +1153,7 @@
   "install_code": "DIFFUSER",
   "example_de": "DFD-Kassette Alu 1000x500mm | DFD-Kassette Alu 1000x500mm",
   "votes": {
-   "Air terminal|Diffuser|DFD cassette diffuser": 13
+   "Air terminal|Diffuser|DFD cassette diffuser": 24
   }
  },
  {
@@ -1170,7 +1170,7 @@
   "install_code": "DIFFUSER",
   "example_de": "DFD-Lampenkassette Alu 2000x290mm | DFD-Lampenkassette Alu 2000x290mm",
   "votes": {
-   "Air terminal|Kitchen ceiling element|DFD lamp cassette": 26
+   "Air terminal|Kitchen ceiling element|DFD lamp cassette": 48
   }
  },
  {
@@ -1186,7 +1186,7 @@
   "install_code": "SUPPORT_SET",
   "example_de": "DFD-Lampenkassette Alu 1500x290mm | L-Profil einschl. Montage zur Wand",
   "votes": {
-   "Support|Angle set|L-profile": 13
+   "Support|Angle set|L-profile": 24
   }
  },
  {
@@ -1203,7 +1203,7 @@
   "install_code": "SUPPORT_SET",
   "example_de": "DFD-Lampenkassette Alu 1500x290mm | verzinkt, bzw. Austausch bestehender Aufhängungen",
   "votes": {
-   "Support|Support|Additional ceiling substructure": 13
+   "Support|Support|Additional ceiling substructure": 24
   }
  },
  {
@@ -1220,7 +1220,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Abwäscherei (Schalldämmplatten) | EVS-W-1600x1200x420mm | EVS-W-1600x1200x420mm",
   "votes": {
-   "Equipment|Kitchen hood|EVS-W kitchen canopy": 13
+   "Equipment|Kitchen hood|EVS-W kitchen canopy": 24
   }
  },
  {
@@ -1233,7 +1233,7 @@
   "install_code": "DIFFUSER",
   "example_de": "DSD-Kassette Alu 1000x500mm | DSD-Kassette Alu 1000x500mm",
   "votes": {
-   "Air terminal|Diffuser|DSD cassette diffuser": 13
+   "Air terminal|Diffuser|DSD cassette diffuser": 24
   }
  },
  {
@@ -1250,8 +1250,8 @@
   "install_code": "DIFFUSER",
   "example_de": "DSD-Lampenkassette Alu 1500x290mm | DSD-Lampenkassette Alu 1500x290mm",
   "votes": {
-   "Air terminal|Kitchen ceiling element|DSD lamp cassette": 13,
-   "Equipment|Luminaire|DSD lamp cassette": 13
+   "Air terminal|Kitchen ceiling element|DSD lamp cassette": 24,
+   "Equipment|Luminaire|DSD lamp cassette": 24
   }
  },
  {
@@ -1267,7 +1267,7 @@
   "install_code": "SUPPORT_SET",
   "example_de": "DSD-Lampenkassette Alu 1000x290mm | L-Profil einschl. Montage zur Wand",
   "votes": {
-   "Support|Angle set|L-profile": 13
+   "Support|Angle set|L-profile": 24
   }
  },
  {
@@ -1284,7 +1284,7 @@
   "install_code": "SUPPORT_SET",
   "example_de": "DSD-Lampenkassette Alu 1000x290mm | verzinkt, bzw. Austausch bestehender Aufhängungen",
   "votes": {
-   "Support|Support|Additional ceiling substructure": 13
+   "Support|Support|Additional ceiling substructure": 24
   }
  },
  {
@@ -1300,7 +1300,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Montage",
   "votes": {
-   "Service|Labour|Installation labour": 13
+   "Service|Labour|Installation labour": 24
   }
  },
  {
@@ -1317,7 +1317,7 @@
   "install_code": "COMMISSION_SYSTEM",
   "example_de": "Ausführungszeichnung Deckenspiegel REVEN / IBN / Meetings | Einregulierung | Einregulierung",
   "votes": {
-   "Service|Commissioning|Airflow balancing (commissioning) for ceiling layout REVEN / IBN / Meetings": 13
+   "Service|Commissioning|Airflow balancing (commissioning) for ceiling layout REVEN / IBN / Meetings": 24
   }
  },
  {
@@ -1334,7 +1334,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Regenhut | B x H 65 x 35 cm",
   "votes": {
-   "Equipment|Rain hood|Rain hood": 13
+   "Equipment|Rain hood|Rain hood": 24
   }
  },
  {
@@ -1351,7 +1351,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kompaktschalldämpfer | 100 10 28.5x20.5 27",
   "votes": {
-   "Silencer|Compact|Compact silencer DN100": 13
+   "Silencer|Compact|Compact silencer DN100": 24
   }
  },
  {
@@ -1368,7 +1368,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Schalldämpfer | Druckverlust 20Pa",
   "votes": {
-   "Silencer|Rectangular|Rectangular silencer": 13
+   "Silencer|Rectangular|Rectangular silencer": 24
   }
  },
  {
@@ -1385,7 +1385,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Lieferung und Einbau der folgenden Feldgeräte in die In- stallation. | Drehantrieb, 20 Nm, | Drehantrieb, 20 Nm,",
   "votes": {
-   "Controls|Actuator|Actuator 20 Nm": 26
+   "Controls|Actuator|Actuator 20 Nm": 48
   }
  },
  {
@@ -1402,7 +1402,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Drehantrieb, 5 Nm | Drehantrieb, 5 Nm",
   "votes": {
-   "Controls|Actuator|Actuator 5 Nm": 26
+   "Controls|Actuator|Actuator 5 Nm": 48
   }
  },
  {
@@ -1419,7 +1419,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Brandschutzdämmungen | Aussendämmung EI30 60mm | nach Anforderungen Produktelieferant mit VKF-Zertifizierung",
   "votes": {
-   "Insulation|Fire insulation|External fire-rated insulation": 13
+   "Insulation|Fire insulation|External fire-rated insulation": 24
   }
  },
  {
@@ -1436,7 +1436,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Aussendämmung EI60 60mm (Küchenabluft: EI 30) | nach Anforderungen Produktelieferant mit VKF-Zertifizierung",
   "votes": {
-   "Insulation|Fire insulation|External fire-rated insulation": 26
+   "Insulation|Fire insulation|External fire-rated insulation": 48
   }
  },
  {
@@ -1453,8 +1453,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Durchdringungen durch brandabschnittsbildende Decken EI30 | Kanalverstärkungs-Verbundprofil 110x26mm, Itumeszie- rendes Rundporfil 16-39mm und L-Profil Stahl verzinkt 40 x 40x 3mm | 350 x 200",
   "votes": {
-   "Fire protection|Rectangular seal|EI30 rectangular fire seal with reinforcement composite profile 110x26 mm": 13,
-   "Fire protection|Rectangular seal|Rectangular fire seal": 13
+   "Fire protection|Rectangular seal|EI30 rectangular fire seal with reinforcement composite profile 110x26 mm": 24,
+   "Fire protection|Rectangular seal|Rectangular fire seal": 24
   }
  },
  {
@@ -1471,7 +1471,7 @@
   "install_code": "FIRE_ACCESS",
   "example_de": "Revisisondeckel bei BS-Dämmungen | 400 x 300",
   "votes": {
-   "Fire protection|Inspection cover|Inspection cover for BS-insulation": 13
+   "Fire protection|Inspection cover|Inspection cover for BS-insulation": 24
   }
  },
  {
@@ -1488,8 +1488,8 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 Geräteanschluss ganzer Querschnitt | 1 Leerteil | 1 Leerteil",
   "votes": {
-   "Equipment|AHU section|AHU empty section": 26,
-   "Equipment|AHU section|Empty AHU section": 13
+   "Equipment|AHU section|AHU empty section": 48,
+   "Equipment|AHU section|Empty AHU section": 24
   }
  },
  {
@@ -1506,7 +1506,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 Leerteil | 1 Leerteil",
   "votes": {
-   "Equipment|AHU section|Enthalpy plate heat-exchanger section": 13
+   "Equipment|AHU section|Enthalpy plate heat-exchanger section": 24
   }
  },
  {
@@ -1523,7 +1523,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 Tropfenabscheiderteil | 1 Tropfenabscheiderteil",
   "votes": {
-   "Equipment|AHU section|Droplet separator section": 13
+   "Equipment|AHU section|Droplet separator section": 24
   }
  },
  {
@@ -1540,7 +1540,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 Leerteil | 1 Leerteil",
   "votes": {
-   "Equipment|AHU section|Empty AHU section (Leerteil)": 13
+   "Equipment|AHU section|Empty AHU section (Leerteil)": 24
   }
  },
  {
@@ -1557,7 +1557,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "1 WRG-System Aluplatten-Wärmetauscherteil | 1 Leerteil | 1 Leerteil",
   "votes": {
-   "Equipment|AHU section|Aluminium plate heat-recovery exchanger section (WRG-System Aluplatten-Wärmetauscherteil)": 13
+   "Equipment|AHU section|Aluminium plate heat-recovery exchanger section (WRG-System Aluplatten-Wärmetauscherteil)": 24
   }
  },
  {
@@ -1574,7 +1574,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Wetterschutzgitter | Grösse (B x H) 140 x 100 cm",
   "votes": {
-   "Air terminal|Weather louvre|Weather louvre": 13
+   "Air terminal|Weather louvre|Weather louvre": 24
   }
  },
  {
@@ -1590,8 +1590,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Regenhut | B x H 100 x 70 cm",
   "votes": {
-   "Air terminal|Weather louvre|Rain hood": 13,
-   "Ductwork|Fitting|Rain hood": 13
+   "Air terminal|Weather louvre|Rain hood": 24,
+   "Ductwork|Fitting|Rain hood": 24
   }
  },
  {
@@ -1608,7 +1608,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Überströmer Klassenzimmer | Grösse (B x H) 17.5 x 49 x 24 cm",
   "votes": {
-   "Air terminal|Transfer unit|Transfer/overflow unit": 13
+   "Air terminal|Transfer unit|Transfer/overflow unit": 24
   }
  },
  {
@@ -1625,7 +1625,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Überströmer Klassenzimmer | Typ z.B. EBS-D-3-1",
   "votes": {
-   "Air terminal|Option|Insert for transfer element for high airflow": 13
+   "Air terminal|Option|Insert for transfer element for high airflow": 24
   }
  },
  {
@@ -1642,7 +1642,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Überströmer Büros und Gruppenräum | Grösse (B x H) 17.5 x 49 x 24 cm",
   "votes": {
-   "Air terminal|Transfer unit|Transfer/overflow unit": 13
+   "Air terminal|Transfer unit|Transfer/overflow unit": 24
   }
  },
  {
@@ -1659,7 +1659,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Überströmer Büros und Gruppenräum | Typ z.B. EBS-D-3-1",
   "votes": {
-   "Air terminal|Option|Insert for transfer element for high airflow": 13
+   "Air terminal|Option|Insert for transfer element for high airflow": 24
   }
  },
  {
@@ -1676,7 +1676,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Wirbelstrahlauslass Büros und Gruppenräum | Anschluss v. hinten 2 x 124 mm",
   "votes": {
-   "Air terminal|Diffuser|Swirl jet diffuser WSA spezial": 13
+   "Air terminal|Diffuser|Swirl jet diffuser WSA spezial": 24
   }
  },
  {
@@ -1693,7 +1693,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Wirbelstrahlauslass Klassenzimmer | Anschluss v. hinten 2 x 179 mm",
   "votes": {
-   "Air terminal|Diffuser|Swirl jet diffuser WSA spezial": 13
+   "Air terminal|Diffuser|Swirl jet diffuser WSA spezial": 24
   }
  },
  {
@@ -1710,7 +1710,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Wirbelstrahlauslass Teamzimmer | Anschluss v. hinten 2 x 179 mm",
   "votes": {
-   "Air terminal|Diffuser|Swirl jet diffuser Team room": 13
+   "Air terminal|Diffuser|Swirl jet diffuser Team room": 24
   }
  },
  {
@@ -1726,7 +1726,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Kompaktschalldämpfer | 90 10 28x20 27 dB",
   "votes": {
-   "Silencer|Compact|Compact silencer": 52
+   "Silencer|Compact|Compact silencer": 96
   }
  },
  {
@@ -1743,10 +1743,10 @@
   "install_code": "UNKNOWN",
   "example_de": "Einkanal-Volumenstromregler für variable ZUL und ABL | TVJ-D 30x20 800 1600 300",
   "votes": {
-   "Flow controller|VAV rectangular|VAV controller TVJ-D": 13,
-   "Flow controller|VAV circular|Variable volume controller TVR-D DN125": 13,
-   "Flow controller|VAV circular|Variable volume controller TVR-D DN160": 13,
-   "Flow controller|VAV circular|Variable volume controller TVR-D DN200": 13
+   "Flow controller|VAV rectangular|VAV controller TVJ-D": 24,
+   "Flow controller|VAV circular|Variable volume controller TVR-D DN125": 24,
+   "Flow controller|VAV circular|Variable volume controller TVR-D DN160": 24,
+   "Flow controller|VAV circular|Variable volume controller TVR-D DN200": 24
   }
  },
  {
@@ -1763,7 +1763,7 @@
   "install_code": "DAMPER",
   "example_de": "Drosselklappen | Grösse ø 10 cm",
   "votes": {
-   "Damper|Manual damper|Manual balancing damper DN100": 13
+   "Damper|Manual damper|Manual balancing damper DN100": 24
   }
  },
  {
@@ -1780,8 +1780,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Montage und Transport | samten Montagezeit gewährleistet sein.",
   "votes": {
-   "Service|Transport|Use of lifting platform on-site": 13,
-   "Service|Transport|Lifting platform hire": 13
+   "Service|Transport|Use of lifting platform on-site": 24,
+   "Service|Transport|Lifting platform hire": 24
   }
  },
  {
@@ -1798,8 +1798,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Doppelwandige Blechkanäle mit Ummantelung in V2A Thermische Aussendämmung 100/15 | Wetterfeste Ummantelung V2A inkl. Abdichtung",
   "votes": {
-   "Ductwork|Option|V2A weatherproof cladding for double-walled duct": 13,
-   "Insulation|Weatherproof 100 mm|Weatherproof V2A cladding for duct": 13
+   "Ductwork|Option|V2A weatherproof cladding for double-walled duct": 24,
+   "Insulation|Weatherproof 100 mm|Weatherproof V2A cladding for duct": 24
   }
  },
  {
@@ -1816,7 +1816,7 @@
   "install_code": "FIRE_ACCESS",
   "example_de": "Revisisondeckel bei BS-Dämmungen | 400 x 200",
   "votes": {
-   "Fire protection|Inspection cover|Inspection cover for insulated ducts": 13
+   "Fire protection|Inspection cover|Inspection cover for insulated ducts": 24
   }
  },
  {
@@ -1833,7 +1833,7 @@
   "install_code": "AHU_LARGE",
   "example_de": "Zuluftgerät 5-1 | Zuluftgerät 5-1",
   "votes": {
-   "Equipment|Air-handling unit|Supply air unit Zuluftgerät 5-1": 13
+   "Equipment|Air-handling unit|Supply air unit Zuluftgerät 5-1": 24
   }
  },
  {
@@ -1850,7 +1850,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Rahmenstellfüsse und feste Gummi-Sockel für Kanäle auf Flachdächern | Kanaldichtheitsprüfung | Nachweis dem Bericht beilegen",
   "votes": {
-   "Service|Testing|Duct tightness test": 13
+   "Service|Testing|Duct tightness test": 24
   }
  },
  {
@@ -1867,7 +1867,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Wetterschutzgitter | Grösse (B x H) 100 x 40 cm",
   "votes": {
-   "Ductwork|Rectangular duct|Weather protection grille": 13
+   "Ductwork|Rectangular duct|Weather protection grille": 24
   }
  },
  {
@@ -1884,7 +1884,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Zuluftgitter | Grösse (B x H) 40 x 10 cm",
   "votes": {
-   "Air terminal|Supply valve|Supply air grille": 13
+   "Air terminal|Supply valve|Supply air grille": 24
   }
  },
  {
@@ -1901,7 +1901,7 @@
   "install_code": "DIFFUSER",
   "example_de": "Düsenrohrdurchlass | 1 Endstück 1800mm und 4: Mittelstück 1800mm",
   "votes": {
-   "Air terminal|Diffuser|Nozzle-duct diffuser": 26
+   "Air terminal|Diffuser|Nozzle-duct diffuser": 48
   }
  },
  {
@@ -1914,8 +1914,8 @@
   "install_code": "UNKNOWN",
   "example_de": "Einkanal-Volumenstromregler für konstanten Vol.strom | VFC 16 200 50.",
   "votes": {
-   "Flow controller|CAV circular|Constant volume controller VFC 16": 13,
-   "Flow controller|CAV circular|Constant volume controller VFC 20": 26
+   "Flow controller|CAV circular|Constant volume controller VFC 16": 24,
+   "Flow controller|CAV circular|Constant volume controller VFC 20": 48
   }
  },
  {
@@ -1932,7 +1932,7 @@
   "install_code": "DAMPER",
   "example_de": "Drosselklappen | Grösse ø 10 cm",
   "votes": {
-   "Damper|Manual damper|Round throttle damper": 13
+   "Damper|Manual damper|Round throttle damper": 24
   }
  },
  {
@@ -1949,7 +1949,7 @@
   "install_code": "SILENCER",
   "example_de": "Rohrschalldämpfer | 100 10 20 10 .....",
   "votes": {
-   "Silencer|Silencer|Circular duct silencer": 65
+   "Silencer|Silencer|Circular duct silencer": 120
   }
  },
  {
@@ -1965,7 +1965,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Drehantrieb, 5 Nm | Drehantrieb, 5 Nm",
   "votes": {
-   "Controls|Actuator 24V|Rotary actuator 5 Nm": 13
+   "Controls|Actuator 24V|Rotary actuator 5 Nm": 24
   }
  },
  {
@@ -1980,7 +1980,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Druckwächter",
   "votes": {
-   "Controls|Field device|Pressure switch (Druckwächter)": 13
+   "Controls|Field device|Pressure switch (Druckwächter)": 24
   }
  },
  {
@@ -1995,7 +1995,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Frostschutzwächter, 2-Punkt",
   "votes": {
-   "Controls|Field device|Frost protection thermostat": 13
+   "Controls|Field device|Frost protection thermostat": 24
   }
  },
  {
@@ -2011,7 +2011,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Kanaltemperatur- und Feuchtefühler",
   "votes": {
-   "Controls|Temperature sensor|Duct temperature and humidity sensor": 13
+   "Controls|Temperature sensor|Duct temperature and humidity sensor": 24
   }
  },
  {
@@ -2026,7 +2026,7 @@
   "install_code": "CONTROL_POINT",
   "example_de": "Einbau der folgenden Feldgeräte in die Installation. | Druckdifferenzfühler",
   "votes": {
-   "Controls|Differential pressure transmitter|Differential pressure transmitter / sensor (Druckdifferenzfühler) for duct pressure measurement": 13
+   "Controls|Differential pressure transmitter|Differential pressure transmitter / sensor (Druckdifferenzfühler) for duct pressure measurement": 24
   }
  },
  {
@@ -2043,7 +2043,7 @@
   "install_code": "UNKNOWN",
   "example_de": "Einbau der bauseits gelieferten Feldgeräte gemäss Aus- schreibung BKP 237.0 Gebäudeautomation | Hygiene-Nachweis für Transport, Montage, Montage Etapp- | Aller notwenigen Laboranalysen, Mess-und Kontrollöffnungen.",
   "votes": {
-   "Service|Testing|Labor analyses and measurement/control openings": 13
+   "Service|Testing|Labor analyses and measurement/control openings": 24
   }
  },
  {
@@ -2058,7 +2058,7 @@
   "install_code": "SUPPORT_SET",
   "example_de": "(untitled) | Montagefüsse z.B. | Montagefüsse z.B.",
   "votes": {
-   "Support|Support|Mounting foot": 13
+   "Support|Support|Mounting foot": 24
   }
  },
  {
@@ -2073,7 +2073,7 @@
   "install_code": "SUPPORT_SET",
   "example_de": "B (mm)     L (mm)     H (mm)     h (mm) | Montageschiene z.B. | Montageschiene z.B.",
   "votes": {
-   "Support|Support|Mounting rail U-profile": 13
+   "Support|Support|Mounting rail U-profile": 24
   }
  }
 ]

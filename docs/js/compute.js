@@ -20,6 +20,8 @@ import { matchPosition } from "./matcher.js";
 import { toNumber } from "./validate.js";
 
 export const PRICED = new Set(["calculated", "assumption_applied", "supplier_quote_required"]);
+// confidence of a price the user set or confirmed (above the 0.9 Perfectly Matched threshold)
+export const USER_PRICE_CONFIDENCE = 0.92;
 const r2 = (v) => (v == null || !Number.isFinite(+v) ? null : Math.round((+v + Number.EPSILON) * 100) / 100);
 const sum = (list, f) => list.reduce((s, x) => s + (Number(f(x)) || 0), 0);
 
@@ -126,14 +128,15 @@ export function applyOverrides(positions, ctx) {
     }
     const tenderQty = p.tender_quantity !== undefined ? p.tender_quantity : p.quantity;
     const quantity = o.quantity != null && o.quantity !== "" ? Number(o.quantity) : tenderQty;
-    if (o.status) m.status = o.status;
+    if (o.status === "calculated" || o.status === "perfectly_matched") { m.status = "calculated"; m.match_confidence = USER_PRICE_CONFIDENCE; }   // confirmed by the user
+    else if (o.status) m.status = o.status;
     else if (quantity != null && tenderQty == null && m.status === "insufficient_information") {
       m.status = m.matched_product_id ? "assumption_applied" : "review_required";
     }
     if (o.unit_price_chf != null && o.unit_price_chf !== "" && Number.isFinite(+o.unit_price_chf)) {
       m.unit_price_chf = +o.unit_price_chf;
       if (!o.status) m.status = "calculated";
-      m.match_confidence = 1;
+      m.match_confidence = USER_PRICE_CONFIDENCE;
       m.match_note = `Unit price set by user: CHF ${(+o.unit_price_chf).toFixed(2)}${o.price_source ? ` (${o.price_source})` : ""}`;
     }
     if (o.note) m.match_note = `${m.match_note} · ${o.note}`.replace(/^ · /, "");
@@ -250,7 +253,7 @@ export function kpis(list) {
     positions: list.length,
     status_counts: counts,
     priceable_positions: list.length,                      // every position of the bill, non-priceable included
-    materials_found: list.filter((p) => p.matched_product_id && p.status === "calculated").length,
+    materials_found: list.filter((p) => p.status === "calculated" && (p.match_confidence ?? 0) >= 0.9).length,   // = Perfectly Matched
     priced_positions: list.filter((p) => p.included_in_total).length,
   };
 }
@@ -363,11 +366,13 @@ function editPosition(p, o, catalog, rules, params, warnings) {
   }
   const direct = material == null ? null : material + (labour || 0);
 
-  // the status (classification) stays the engine's; only a status the user sets explicitly changes it
-  const status = o.status || orig.status;
+  // the status (classification) stays the engine's; only a status the user sets explicitly changes it.
+  // Setting "calculated" (shown as Perfectly Matched) means the user confirms the match and its price.
+  const confirmed = o.status === "calculated" || o.status === "perfectly_matched";
+  const status = confirmed ? "calculated" : o.status || orig.status;
   const priceSource = manual ? "manual" : prodChanged ? (product ? product.source_type || "catalog" : "none") : orig.price_source;
   const basis = direct == null ? "none"
-    : manual || (prodChanged && product) ? "firm"
+    : manual || (prodChanged && product) || confirmed ? "firm"
     : orig.price_basis === "none" || !orig.price_basis ? "firm" : orig.price_basis;
   const range = basis === "estimate" && orig.price_range_chf && ratio != null
     ? { low: r2(orig.price_range_chf.low * ratio), high: r2(orig.price_range_chf.high * ratio) } : null;
@@ -385,8 +390,8 @@ function editPosition(p, o, catalog, rules, params, warnings) {
     net_unit_cost_chf: r2(unitPrice), material_cost_chf: r2(material), adjusted_install_hours: r2(hours),
     labour_cost_chf: r2(labour), direct_position_cost_chf: r2(direct),
     price_source: priceSource, price_basis: basis, price_range_chf: range, status,
-    match_confidence: orig.match_confidence,
-    review_required: orig.review_required ?? (status !== "calculated" && status !== "non_priceable"),
+    match_confidence: confirmed || manual ? USER_PRICE_CONFIDENCE : orig.match_confidence,
+    review_required: confirmed ? false : orig.review_required ?? (status !== "calculated" && status !== "non_priceable"),
     // a price the user entered counts in the totals, unless the user marked the position as not priced
     included_in_total: basis === "firm" && (PRICED.has(status) || ((manual || (prodChanged && product)) && !o.status)),
     match_note: note, status_reason: note,
@@ -413,7 +418,14 @@ export function applyEditsToResults(prev, params, prevParams = {}) {
     const { original, edited, edit, ...rest } = { ...p, ...p.original };   // edit removed: engine values back
     return rest;
   });
+  return retotal(r, prev, params, prevParams, warnings);
+}
 
+/**
+ * Totals, estimates, systems, KPIs and bid range of `r` after its positions changed. `prev` = the
+ * results before (for backend output, its totals are shifted by the change in firm rows).
+ */
+function retotal(r, prev, params, prevParams, warnings) {
   const pos = r.position_results;
   const firm = pos.filter((p) => p.included_in_total);
   const est = pos.filter((p) => p.price_basis === "estimate");
@@ -463,7 +475,10 @@ export function applyEditsToResults(prev, params, prevParams = {}) {
       cost_baseline_low_chf: r2((dir + r.estimated.low_chf) * k), cost_baseline_high_chf: r2((dir + r.estimated.high_chf) * k),
     };
   }
-  const bids = bidRange(r.summary.cost_baseline_chf, params);
+  // bids on the same baseline as before: the pricer prices its bids on the indicative baseline
+  // (firm + estimated), the built-in engine on the firm baseline
+  const onIndicative = /indicative/i.test(prev.recommended_bid_range?.basis || "") && r.indicative_total?.cost_baseline_chf != null;
+  const bids = bidRange(onIndicative ? r.indicative_total.cost_baseline_chf : r.summary.cost_baseline_chf, params);
   r.recommended_bid_range = bids && prev.recommended_bid_range?.basis ? { ...bids, basis: prev.recommended_bid_range.basis } : bids;
   r.systems = (r.systems || []).map((s) => {
     const list = pos.filter((p) => (p.system_code ?? String(p.system || "General").split(" ")[0]) === s.code || p.system === s.name);
@@ -475,9 +490,46 @@ export function applyEditsToResults(prev, params, prevParams = {}) {
     not_priced_positions: pos.filter((p) => p.price_basis === "none").length };
   const edited = pos.filter((p) => p.edited).length;
   r.edited_in_app = { at: new Date().toISOString(), positions: edited };
-  r.warnings = [...new Set([...(prev.warnings || []).filter((w) => !w.startsWith("Edited in the app")),
+  r.warnings = [...new Set([...(prev.warnings || []).filter((w) => !w.startsWith("Edited in the app") && !w.startsWith("Re-computed from the detailed summary")),
     `Edited in the app: ${edited} position(s) re-priced and the totals updated without re-computing. A Re-compute recalculates everything from the files.`,
     ...warnings])];
+  return r;
+}
+
+/**
+ * Re-compute from the detailed summary instead of the tender PDF: the positions as they are now
+ * (engine result + the user's edits: quantities, products, prices, statuses) are re-priced with the
+ * current catalogue, productivity rules and parameters, then totals, estimates and bids are
+ * recalculated. Positions without a catalogue product or a user price (side estimates, labour-only
+ * rows, not-priced rows) keep their values.
+ */
+export function repriceResults(prev, params, prevParams, ctx) {
+  const edited = applyEditsToResults(prev, params, prevParams);          // the summary as the user left it
+  let repriced = 0;
+  edited.position_results = edited.position_results.map((p) => {
+    const manual = p.edit && isNum(p.edit.unit_price_chf);
+    const product = p.matched_product_id ? ctx.products[p.matched_product_id] : null;
+    if (!(+p.quantity > 0) || (!product && !manual)) return p;
+    if (p.price_basis === "estimate" && !manual) return p;               // side estimates keep their own price
+    const installCode = p.install_code || product?.install_code;
+    const c = roundCosts(costPosition(+p.quantity, p.unit,
+      { matched_product_id: product?.product_id, install_code: installCode, unit_price_chf: manual ? p.edit.unit_price_chf : undefined }, ctx));
+    if (!ctx.rules[installCode]) {                                       // no rule in the current file: keep the labour
+      c.adjusted_install_hours = p.adjusted_install_hours;
+      c.labour_cost_chf = p.labour_cost_chf;
+      c.direct_position_cost_chf = r2((c.material_cost_chf || 0) + (+p.labour_cost_chf || 0));
+    }
+    repriced++;
+    return { ...p, net_unit_cost_chf: c.net_unit_cost_chf, material_cost_chf: c.material_cost_chf,
+      adjusted_install_hours: c.adjusted_install_hours, labour_cost_chf: c.labour_cost_chf, direct_position_cost_chf: c.direct_position_cost_chf };
+  });
+  const r = retotal(edited, prev, params, prevParams, []);
+  delete r.edited_in_app;                                                // a computed version, not an in-app edit
+  const nEdits = Object.keys(params.position_overrides || {}).length;
+  r.recomputed_from = { source: "detailed summary", based_on_version: prev.version ?? null, repriced_positions: repriced, edits: nEdits };
+  r.generated_at = new Date().toISOString();
+  r.warnings = [...(r.warnings || []).filter((w) => !w.startsWith("Edited in the app") && !w.startsWith("Re-computed from the detailed summary")),
+    `Re-computed from the detailed summary: ${repriced} position(s) re-priced with the current catalogue, productivity rules and parameters, ${nEdits} edit(s) included. The tender PDF was not read again.`];
   return r;
 }
 

@@ -1,6 +1,6 @@
 import * as store from "./store.js";
 import { KINDS, inspectFile, sha256, validateParameters, crossCheck, decodeText, parseCSV, ValidationError } from "./validate.js";
-import { computeEstimation, buildContext, normalizeBackendOutput, applyEditsToResults, rulesList } from "./compute.js";
+import { computeEstimation, buildContext, normalizeBackendOutput, applyEditsToResults, repriceResults, rulesList } from "./compute.js";
 import { BACKEND_URL, runBackend, backendReachable, backendHost } from "./backend.js";
 import { $, esc, chf, pct, num, toast, busy, progress, shortName, openDialog, closeDialog, ask, choose, computeLabel, stableJson, paramsKey } from "./ui.js";
 import { CATEGORIES, breakdown, viewOf, recommendedScenario } from "./categories.js";
@@ -157,6 +157,8 @@ async function reload(pid = state.project?.id) {
     : null;
   renderDashboard();
   assistantProjectChanged();
+  // the detailed summary below the dashboard follows the new results too (first Compute shows it)
+  if (currentPage === "dashboard" && state.project) refreshSummary(true);
 }
 
 async function newProject() {
@@ -492,7 +494,7 @@ async function ensureWorkingFiles() {
   });
 }
 
-$("recomputeBtn").onclick = async () => {
+$("recomputeBtn").onclick = async (ev) => {
   const errors = validateParameters(state.project.parameters);
   if (errors.length) return toast(`Fix the parameters first:\n${errors.join("\n")}`, true);
   const missing = KINDS.filter((k) => !state.project.workingFiles?.[k]);
@@ -505,8 +507,15 @@ $("recomputeBtn").onclick = async () => {
     if (!again) return;
   }
 
+  // After the first Compute, Re-compute starts from the detailed summary (the positions with the user's
+  // edits) instead of reading the tender PDF again, as long as the tender file is unchanged.
+  // Shift + click reads the tender again anyway.
+  const latestRes = state.latest?.results;
+  const fromSummary = !!latestRes && !ev?.shiftKey
+    && state.project.workingFiles?.tender?.sha256 === state.latest?.files?.tender?.sha256;
+
   // the pricer runs on this PC: make sure it is up before a version is reserved
-  let useBackend = !!BACKEND_URL;
+  let useBackend = !!BACKEND_URL && !fromSummary;
   if (useBackend && !(await backendReachable())) {
     const how = await new Promise((resolve) => {
       openDialog("The pricer is not running", `
@@ -538,6 +547,13 @@ $("recomputeBtn").onclick = async () => {
     };
     const afterSave = async (blobs, version, manifest) => {
       const tenderName = manifest.files.tender.filename;
+      if (fromSummary) {
+        progress("Re-pricing the positions from the detailed summary…");
+        const ctx = buildContext(manifest.parameters, parsed.catalog, parsed.productivity);
+        const results = repriceResults(latestRes, manifest.parameters, state.latest.parameters || {}, ctx);
+        results.version = version;
+        return { results };
+      }
       if (!useBackend) {
         return computeEstimation({
           version, parameters: manifest.parameters, catalog: parsed.catalog,

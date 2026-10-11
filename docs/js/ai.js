@@ -44,7 +44,7 @@ function setPath(o, path, v) {
   keys.reduce((x, k) => (x[k] ??= {}), o)[last] = v;
 }
 const STATUS_WORDS = {
-  calculated: "priced from the catalogue", assumption_applied: "priced with an assumption",
+  calculated: "perfectly matched", perfectly_matched: "perfectly matched", assumption_applied: "priced with an assumption",
   supplier_quote_required: "needs a supplier price", review_required: "needs a manual check",
   insufficient_information: "information missing in the tender",
   // one category in the app: "out_of_scope" (pricer) and "non_priceable" are both Non-priceable
@@ -185,7 +185,7 @@ const TOOLS = {
               unit_price_chf: { type: "number" },
               product_id: { type: "string", description: "catalogue id of a different product; leave out to keep the current one" },
               remove_product: { type: "boolean", description: "true only if the user explicitly asks to remove the product from the position" },
-              status: { type: "string", description: "only if the user explicitly asks to change the status: calculated | assumption_applied | supplier_quote_required | review_required | insufficient_information | non_priceable" },
+              status: { type: "string", description: "only if the user explicitly asks to change the status: calculated (= Perfectly Matched, the user confirms the match) | assumption_applied | supplier_quote_required | review_required | insufficient_information | non_priceable" },
               price_source: { type: "string", description: "where a unit price comes from, e.g. Quote Trox 12.10.2026" },
               note: { type: "string" },
             },
@@ -220,17 +220,24 @@ const TOOLS = {
           else edit.product_id = c.product_id;
         }
         if (c.status === "out_of_scope") c.status = "non_priceable";            // merged into one option
-        if (c.status && c.status !== row.status) {
+        if (c.status === "perfectly_matched") c.status = "calculated";          // the same confirmed status
+        // compare with what the position shows, not its raw status: "calculated" without a confirmed
+        // match still shows as Assumption applied, so asking for Perfectly Matched must go through
+        const pricedNow = row.status === "calculated" && (row.match_confidence ?? 0) >= 0.9;
+        if (c.status && (c.status !== row.status || (c.status === "calculated" && !pricedNow))) {
           if (STATUS_WORDS[c.status]) edit.status = c.status;
           else problems.push(`${c.lv_id}: unknown status ${c.status}`);
         }
+        // a price the user confirms through BIDBOT (new or the current one) settles the position: it becomes
+        // Perfectly Matched (confirmed match, firm price in the totals), unless another status was asked for
+        if (isNum(c.unit_price_chf) && !edit.status && !c.status && !pricedNow) edit.status = "calculated";
         if (c.price_source && "unit_price_chf" in edit) edit.price_source = String(c.price_source).slice(0, 120);
         if (c.note) edit.note = String(c.note).slice(0, 300);
         if (!Object.keys(edit).length) { problems.push(`${c.lv_id}: nothing to change`); continue; }
         changes.push({
           type: "position", lv_id: row.lv_id, page: row.source_page,
           label: row.description || row.description_de || row.lv_id,
-          before: clean({ quantity: row.quantity, unit: row.unit, unit_price_chf: row.net_unit_cost_chf, product_id: row.matched_product_id, status: row.status }),
+          before: clean({ quantity: row.quantity, unit: row.unit, unit_price_chf: row.net_unit_cost_chf, product_id: row.matched_product_id, status: row.status, match_confidence: row.match_confidence }),
           edit,
         });
       }
@@ -357,7 +364,7 @@ How to work:
 - Position counts: use the app's categories from get_overview (by_category, priceable_positions). Priceable positions = every position of the bill (priceable_positions), the non-priceable ones included; "Non-priceable" is one category that includes everything out of scope, never count out of scope separately.
 - Bid scenarios: recommend the one with the highest win probability (the app's current rule until there is more bid history; get_overview gives it as bid_range.recommended). Mention its margin and expected contribution as information, not as the reason.
 - Firm prices (catalogue / supplier package) make the totals and the bids; estimated prices are side estimates with a range; some positions are not priced.
-- If the user asks to change something (a quantity, a price from a supplier quote, a product, a status, a parameter such as overhead or margin), call propose_changes. Look the positions up first. Only change what the user asked for: send only the fields being changed (leave every other field out; never send product_id to keep a product, use remove_product only if the user asks to remove it); do not add a status change unless the user explicitly asks to change a position's status (classifying positions is the job of Compute). Then tell the user in one sentence to check the card and click "Apply"; prices and totals then update right away. Never claim a change is done before the user applied it.
+- If the user asks to change something (a quantity, a price from a supplier quote, a product, a status, a parameter such as overhead or margin), call propose_changes. Look the positions up first. Only change what the user asked for: send only the fields being changed (leave every other field out; never send product_id to keep a product, use remove_product only if the user asks to remove it); do not add a status change unless the user explicitly asks to change a position's status (classifying positions is the job of Compute). When the user confirms a price (a new one, e.g. from a supplier quote, or the current one), send unit_price_chf: the app then marks that position as Perfectly Matched by itself, so no status is needed. Then tell the user in one sentence to check the card and click "Apply"; prices and totals then update right away. Never claim a change is done before the user applied it.
 - Uploaded supplier quotes: when the user uploads one, read its text, call save_quote_details once with every offered item (net unit price after discounts, excl. VAT) linked to the tender positions it prices (look positions up with find_positions; only link when the item clearly matches size and type). Then say in plain words what the quote covers, what it costs compared with our current price for those positions, and anything to watch (validity, delivery time, exclusions). Then offer to use the prices and, if the user agrees or asked for it, call propose_changes with unit_price_chf and price_source "Quote <supplier> <date>".
 - Comparing quotes: use list_quotes and get_quote; compare per position on net unit price, whether everything required is included, delivery time, validity and conditions; recommend one in a sentence and say why.
 - Supplier price requests: group the positions per supplier, then call show_email_draft once per supplier. Write the email in German (Swiss style: "ss" instead of "ß", "Freundliche Grüsse"), formal and short, listing each position with tender page, description, size/type, quantity and unit, asking for net prices, delivery time and offer validity, and mentioning the project name. Use placeholders like [Name] for unknown contact details.`;
@@ -378,13 +385,14 @@ class QuotaError extends Error {
   constructor(retryAt) { super("quota_exhausted"); this.retryAt = retryAt ? new Date(retryAt) : null; }
 }
 
-async function callRelay(contents) {
+async function callRelay(contents, { noTools = false } = {}) {
   const body = {
     systemInstruction: { parts: [{ text: systemText() }] },
     contents,
     tools: [{ functionDeclarations: Object.entries(TOOLS).map(([name, t]) => ({ name, description: t.description, parameters: t.parameters })) }],
     generationConfig: { temperature: 0.4 },
   };
+  if (noTools) body.toolConfig = { functionCallingConfig: { mode: "NONE" } };     // text answer only
   const token = await ctx.store.idToken();
   let res;
   try {
@@ -431,11 +439,25 @@ async function ask(text, { display = null, attachment = null } = {}) {
   try {
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
       trim(chat.contents);
-      const data = await callRelay(chat.contents);
-      const cand = data?.candidates?.[0];
+      let data = await callRelay(chat.contents), cand = data?.candidates?.[0];
+      // Gemini sometimes produces a broken tool call (long input, nested arguments). Try again, telling
+      // it so; if that fails too, ask once more without tools, so there is at least a plain answer.
+      for (let retry = 1; retry <= 2 && !cand?.content?.parts?.length && !data?.promptFeedback?.blockReason
+        && /MALFORMED_FUNCTION_CALL|^$/.test(cand?.finishReason || ""); retry++) {
+        setThinking(["retrying"]);
+        const last = chat.contents.at(-1);
+        const nudge = { text: retry === 1
+          ? "(Your last tool call was not valid JSON. Call the tool again with simple, valid arguments: plain numbers, short strings.)"
+          : "(Answer in plain text now, without calling any tools.)" };
+        const turn = { ...last, parts: [...last.parts, nudge] };
+        data = await callRelay([...chat.contents.slice(0, -1), turn], { noTools: retry === 2 });
+        cand = data?.candidates?.[0];
+      }
       if (!cand?.content?.parts?.length) {
         const why = data?.promptFeedback?.blockReason || cand?.finishReason || "no answer";
-        throw new Error(`The AI returned no answer (${why}). Please rephrase the question.`);
+        throw new Error(why === "MALFORMED_FUNCTION_CALL"
+          ? "The AI could not process this request right now. Please try again, or ask in a shorter way."
+          : `The AI returned no answer (${why}). Please rephrase the question.`);
       }
       chat.contents.push({ role: "model", parts: cand.content.parts });
       const calls = cand.content.parts.filter((p) => p.functionCall);
@@ -619,7 +641,8 @@ function render(m) {
     renderChangeCard(el, m);
   } else {
     el.className = `ai-msg ${m.role} ${m.kind || ""}`;
-    el.innerHTML = m.role === "user" ? `<p>${esc(m.text)}</p>` : md(m.text);
+    el.innerHTML = m.role === "user"
+      ? `${m.attachment ? `<span class="ai-file">📄 ${esc(m.attachment.name)}</span>` : ""}<p>${esc(m.text)}</p>` : md(m.text);
   }
   $("aiLog").appendChild(el);
   $("aiLog").scrollTop = $("aiLog").scrollHeight;
@@ -666,32 +689,73 @@ function addQuoteCard(q) {
   render(m);
 }
 
-/** Upload a supplier quote PDF: store it with the project, read its text, let the AI extract it. */
-async function uploadQuote(file) {
+/**
+ * Supplier quote PDF: 📎 reads the file and shows it as a chip above the message box; nothing is
+ * sent yet. Send uploads it with the project and sends it together with the typed message (or a
+ * default question when the box is empty).
+ */
+let pendingQuote = null;            // {file, text, pages}
+
+async function attachQuote(file) {
   if (!file || chat.busy) return;
   if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") return addMessage("assistant", "Please upload the quote as a PDF file.", "error");
   if (file.size > 25 * 1024 * 1024) return addMessage("assistant", "That file is larger than 25 MB. Please upload a smaller PDF.", "error");
   if (!ctx.state.project) return;
-  showLog();
   setBusy(true);
   setThinking(["reading_quote"]);
-  let quote;
   try {
     const pages = await readPdfLines(await file.arrayBuffer());
     const text = pages.map((pg, i) => `--- page ${i + 1} ---\n${pg.lines.map((l) => l.text).join("\n")}`).join("\n");
     if (text.replace(/--- page \d+ ---|\s/g, "").length < 80) {
-      setBusy(false); setThinking(null);
       return addMessage("assistant", `I can't read any text in "${file.name}". It is probably a scanned image. Please upload a PDF with selectable text (e.g. the supplier's original PDF).`, "error");
     }
-    quote = await ctx.store.addQuote(ctx.state.user, ctx.state.project.id, file, text, pages.length);
+    pendingQuote = { file, text, pages: pages.length };
+    renderAttachment();
+    $("aiInput").placeholder = "Add a question about this quote, or just press Send…";
+    $("aiInput").focus();
+  } catch (e) {
+    addMessage("assistant", `The quote could not be read: ${e.message || e}`, "error");
+  } finally {
+    setBusy(false);
+    setThinking(null);
+  }
+}
+
+function renderAttachment() {
+  const el = $("aiAttached");
+  el.hidden = !pendingQuote;
+  el.innerHTML = pendingQuote
+    ? `<span class="ai-chip" title="Sent with your next message">📄 ${esc(pendingQuote.file.name)} <small>· ${pendingQuote.pages} page${pendingQuote.pages === 1 ? "" : "s"}</small>
+        <button type="button" data-drop title="Remove the attachment" aria-label="Remove the attachment">×</button></span>` : "";
+}
+function dropAttachment() {
+  pendingQuote = null;
+  renderAttachment();
+  $("aiInput").placeholder = "Ask about this tender, or upload a supplier quote…";
+}
+
+/** Send the message box (and the attached quote, if any). */
+async function send(typed) {
+  const text = String(typed || "").trim();
+  if (chat.busy || (!text && !pendingQuote)) return;
+  if (!pendingQuote) return ask(text);
+  const att = pendingQuote;
+  setBusy(true);
+  setThinking(["reading_quote"]);
+  let quote;
+  try {
+    quote = await ctx.store.addQuote(ctx.state.user, ctx.state.project.id, att.file, att.text, att.pages);
   } catch (e) {
     setBusy(false); setThinking(null);
     return addMessage("assistant", `The quote could not be uploaded: ${e.message || e}`, "error");
   }
   setBusy(false);
   setThinking(null);
-  await ask(`I uploaded a supplier quote "${quote.filename}" (quote_id ${quote.id}, ${quote.pages} pages). Read it and save its details, then tell me what it covers and how its prices compare with ours.\n\nQuote text:\n${quote.text}`,
-    { display: `📄 Uploaded quote: ${quote.filename}`, attachment: { quote_id: quote.id, name: quote.filename } });
+  dropAttachment();
+  const header = `I attached a supplier quote "${quote.filename}" (quote_id ${quote.id}, ${quote.pages} pages). First save its details with save_quote_details.`;
+  const request = text || "Then tell me what it covers and how its prices compare with ours.";
+  await ask(`${header}\n${text ? `Then answer my message: ${text}` : request}\n\nQuote text:\n${quote.text}`,
+    { display: text || `Please review this quote.`, attachment: { quote_id: quote.id, name: quote.filename } });
 }
 
 // ---- proposed changes ---------------------------------------------------------------------------
@@ -712,7 +776,11 @@ function changeLines(c) {
   if ("quantity" in e) parts.push(`quantity ${fmtNum(b.quantity)} → <b>${fmtNum(e.quantity)}</b> ${esc(b.unit || "")}`);
   if ("unit_price_chf" in e) parts.push(`unit price ${b.unit_price_chf != null ? `CHF ${chf(b.unit_price_chf)}` : "none"} → <b>CHF ${chf(e.unit_price_chf)}</b>${e.price_source ? ` <small>(${esc(e.price_source)})</small>` : ""}`);
   if ("product_id" in e) parts.push(`product ${esc(b.product_id || "none")} → <b>${esc(e.product_id || "none")}</b>`);
-  if ("status" in e) parts.push(`<b class="ai-change-status">status ${esc(STATUS_WORDS[b.status] || b.status || "–")} → ${esc(STATUS_WORDS[e.status] || e.status)}</b>`);
+  // the status as shown in the app (category), e.g. "Assumption applied → Perfectly Matched"
+  const shown = (st, conf) => CATEGORY[categorize({ status: st, match_confidence: conf })]?.label || st || "–";
+  if ("status" in e) parts.push(e.status === "calculated"
+    ? `<b class="ai-change-ok">✓ confirmed: ${esc(shown(b.status, b.match_confidence))} → Perfectly Matched</b>`
+    : `<b class="ai-change-status">status ${esc(shown(b.status, b.match_confidence))} → ${esc(shown(e.status, b.match_confidence))}</b>`);
   if (e.note) parts.push(`note: “${esc(e.note)}”`);
   return `<li><b>${esc(c.label)}</b> <small>(${esc(c.lv_id)}, page ${esc(c.page ?? "–")})</small><br>${parts.join(" · ")}</li>`;
 }
@@ -775,7 +843,7 @@ function addChangeCard({ summary, changes }) {
 }
 
 const TOOL_TEXT = { get_overview: "Reading the estimate…", find_positions: "Searching positions…", get_position: "Checking a position…",
-  list_catalog: "Checking the catalogue…", show_email_draft: "Writing email drafts…", propose_changes: "Preparing the changes…",
+  list_catalog: "Checking the catalogue…", show_email_draft: "Writing email drafts…", propose_changes: "Preparing the changes…", retrying: "Trying again…",
   reading_quote: "Reading the quote…", save_quote_details: "Saving the quote…", list_quotes: "Looking at the quotes…", get_quote: "Reading a quote…" };
 function setThinking(names) {
   $("aiThinking").hidden = !names && !chat.busy;
@@ -789,6 +857,7 @@ function setBusy(b) {
 
 function startConversation() {
   freshChat();
+  if (pendingQuote) dropAttachment();
   $("aiLog").innerHTML = "";
   showLog();
   render({ role: "assistant", kind: "intro", text: results()
@@ -854,6 +923,7 @@ export function initAssistant(context) {
       <div id="aiHistory" class="ai-history" hidden></div>
       <div id="aiThinking" class="ai-thinking" hidden>Thinking…</div>
       <div class="ai-quick">${QUICK.map((q) => `<button data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div id="aiAttached" class="ai-attached" hidden></div>
       <form id="aiForm" class="ai-form">
         <button type="button" id="aiAttach" class="ai-attach" title="Upload a supplier quote (PDF)">📎</button>
         <input type="file" id="aiFile" accept="application/pdf,.pdf" hidden>
@@ -878,10 +948,11 @@ export function initAssistant(context) {
     const item = e.target.closest("[data-open]");
     if (item) openChat(item.dataset.open);
   };
-  $("aiPanel").querySelector(".ai-quick").onclick = (e) => { const q = e.target.closest("[data-q]"); if (q) ask(q.dataset.q); };
+  $("aiPanel").querySelector(".ai-quick").onclick = (e) => { const q = e.target.closest("[data-q]"); if (q) send(q.dataset.q); };
   $("aiAttach").onclick = () => { $("aiFile").value = ""; $("aiFile").click(); };
-  $("aiFile").onchange = (e) => uploadQuote(e.target.files[0]);
-  $("aiForm").onsubmit = (e) => { e.preventDefault(); const t = $("aiInput").value; $("aiInput").value = ""; ask(t); };
+  $("aiFile").onchange = (e) => attachQuote(e.target.files[0]);
+  $("aiAttached").onclick = (e) => { if (e.target.closest("[data-drop]")) dropAttachment(); };
+  $("aiForm").onsubmit = (e) => { e.preventDefault(); const t = $("aiInput").value; $("aiInput").value = ""; send(t); };
   $("aiInput").onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("aiForm").requestSubmit(); } };
 }
 

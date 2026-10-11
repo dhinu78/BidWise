@@ -2,11 +2,16 @@
 //
 // The browser app sends chat requests here; this Worker checks that the caller is signed in to the
 // BIDWISE Firebase project, puts its fixed scope rules (tender topics only) in front of the
-// request, adds the secret Gemini API key and forwards it to Google's Gemini API. The key never
-// reaches the browser, and the scope rules can't be removed by the caller.
+// request, adds the secret API key and forwards it to OpenAI (main, when OPENAI_API_KEY is set) or
+// Google's Gemini API (backup). The key never reaches the browser, and the scope rules can't be
+// removed by the caller. The app always speaks the Gemini request/response format; for OpenAI the
+// Worker translates both ways (messages, tools, tool calls and results).
 //
 // Settings (Cloudflare dashboard → Worker → Settings → Variables and Secrets):
-//   GEMINI_API_KEY       secret   key from https://aistudio.google.com (free tier)
+//   OPENAI_API_KEY       secret   optional; with it, OpenAI answers first and Gemini is the backup
+//   OPENAI_MODEL         text     optional, default "gpt-5-mini" (e.g. "gpt-5" for the most careful answers)
+//   OPENAI_REASONING     text     optional, reasoning effort for gpt-5 / o-series models, default "low"
+//   GEMINI_API_KEY       secret   key from https://aistudio.google.com (free tier); backup, or main without OpenAI
 //   GEMINI_MODELS        text     optional, comma-separated model chain (default: DEFAULT_MODELS below)
 //   GEMINI_MODEL         text     optional, older single-model setting; tried first if set
 //   FIREBASE_PROJECT_ID  text     optional, default "sprintd-hackathon"
@@ -80,8 +85,21 @@ export default {
       .slice(0, MAX_APP_INSTRUCTION);
     forward.systemInstruction = { parts: [{ text: appText ? `${SCOPE_RULES}\n\n--- App context ---\n${appText}` : SCOPE_RULES }] };
 
-    // 3. call Gemini with the secret key: first model in the chain that still has free allowance
-    if (!env.GEMINI_API_KEY) return json(500, { error: "not_configured", message: "GEMINI_API_KEY is not set" });
+    // 3a. OpenAI first, when configured. Falls through to Gemini on used-up credits, overload or outage.
+    let openaiError = null;
+    if (env.OPENAI_API_KEY) {
+      const r = await callOpenAI(forward, env);
+      if (r.ok) return new Response(JSON.stringify(r.body), { status: 200, headers: { ...cors, "Content-Type": "application/json", "X-Model": r.model } });
+      if (!r.fallback) return json(502, { error: "upstream", status: r.status, message: r.message });
+      openaiError = r.message;
+      console.log(`OpenAI unavailable, using Gemini: ${r.message}`);
+    }
+
+    // 3b. Gemini: first model in the chain that still has free allowance
+    if (!env.GEMINI_API_KEY) {
+      return openaiError ? json(502, { error: "upstream", message: `OpenAI: ${openaiError}` })
+        : json(500, { error: "not_configured", message: "neither OPENAI_API_KEY nor GEMINI_API_KEY is set" });
+    }
     const payload = JSON.stringify(forward);
     // the history may hold another model's thought signatures; a model that rejects them gets it without
     const plain = JSON.stringify({ ...forward, contents: forward.contents.map((c) => ({
@@ -127,6 +145,100 @@ export default {
     return json(429, { error: "quota_exhausted", retry_at: new Date(Math.max(back, now)).toISOString() });
   },
 };
+
+// ---- OpenAI (Chat Completions), translated from / to the Gemini format the app uses ---------------
+
+/**
+ * Gemini request -> OpenAI messages. Gemini tool calls carry no ids, so they get ids here
+ * ("call_<turn>_<n>") and the tool results of the following user turn are matched to them in order
+ * (the app answers every call of a turn, in the same order). Thought parts are skipped.
+ */
+function toOpenAI(req, env) {
+  const model = (env.OPENAI_MODEL || "gpt-5-mini").trim();
+  const messages = [];
+  const sys = (req.systemInstruction?.parts || []).map((p) => p.text || "").join("\n");
+  if (sys) messages.push({ role: "system", content: sys });
+  let pendingIds = [];
+  (req.contents || []).forEach((turn, t) => {
+    const parts = (turn.parts || []).filter((p) => !p.thought);
+    if (turn.role === "model") {
+      const text = parts.filter((p) => typeof p.text === "string").map((p) => p.text).join("");
+      const calls = parts.filter((p) => p.functionCall).map((p, n) => ({
+        id: p.functionCall.id || `call_${t}_${n}`, type: "function",
+        function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args || {}) },
+      }));
+      pendingIds = calls.map((c) => c.id);
+      const msg = { role: "assistant", content: text || null };
+      if (calls.length) msg.tool_calls = calls;
+      if (text || calls.length) messages.push(msg);
+      return;
+    }
+    // user turn: tool results first (answering the previous turn's calls), then any text
+    parts.filter((p) => p.functionResponse).forEach((p, n) => {
+      messages.push({ role: "tool", tool_call_id: p.functionResponse.id || pendingIds[n] || `call_${t - 1}_${n}`,
+        content: JSON.stringify(p.functionResponse.response ?? {}) });
+    });
+    pendingIds = [];
+    const text = parts.filter((p) => typeof p.text === "string").map((p) => p.text).join("\n");
+    if (text) messages.push({ role: "user", content: text });
+  });
+  const body = { model, messages };
+  const decls = (req.tools || []).flatMap((t) => t.functionDeclarations || []);
+  if (decls.length) {
+    body.tools = decls.map((d) => ({ type: "function", function: { name: d.name, description: d.description || "", parameters: d.parameters || { type: "object", properties: {} } } }));
+    if (req.toolConfig?.functionCallingConfig?.mode === "NONE") body.tool_choice = "none";
+  }
+  const reasoning = /^(gpt-5|o\d)/i.test(model);
+  if (reasoning) body.reasoning_effort = (env.OPENAI_REASONING || "low").trim();
+  else if (req.generationConfig?.temperature != null) body.temperature = req.generationConfig.temperature;
+  return body;
+}
+
+/** OpenAI response -> Gemini response. A tool call with broken JSON arguments is reported as
+ *  MALFORMED_FUNCTION_CALL (no parts), which the app already retries. */
+function fromOpenAI(data) {
+  const choice = data?.choices?.[0] || {};
+  const msg = choice.message || {};
+  const parts = [];
+  if (typeof msg.content === "string" && msg.content.trim()) parts.push({ text: msg.content });
+  for (const c of msg.tool_calls || []) {
+    if (c.type !== "function") continue;
+    let args;
+    try { args = c.function.arguments ? JSON.parse(c.function.arguments) : {}; }
+    catch { return { candidates: [{ finishReason: "MALFORMED_FUNCTION_CALL" }] }; }
+    parts.push({ functionCall: { name: c.function.name, args } });
+  }
+  const finishReason = { stop: "STOP", tool_calls: "STOP", length: "MAX_TOKENS", content_filter: "SAFETY" }[choice.finish_reason] || "STOP";
+  const u = data?.usage || {};
+  return {
+    candidates: [{ content: { role: "model", parts }, finishReason }],
+    usageMetadata: { promptTokenCount: u.prompt_tokens, candidatesTokenCount: u.completion_tokens, totalTokenCount: u.total_tokens },
+    modelVersion: data?.model,
+  };
+}
+
+/** -> {ok, body, model} or {ok: false, fallback, status, message} (fallback = try Gemini instead) */
+async function callOpenAI(geminiReq, env) {
+  const body = toOpenAI(geminiReq, env);
+  let res, text;
+  try {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify(body),
+    });
+    text = await res.text();
+  } catch {
+    return { ok: false, fallback: true, message: "OpenAI is not reachable" };
+  }
+  let data = null;
+  try { data = JSON.parse(text); } catch {}
+  if (res.ok) return { ok: true, body: fromOpenAI(data), model: data?.model || body.model };
+  const message = data?.error?.message || text.slice(0, 300);
+  // used-up credits, rate limits, overload, outage, bad key or unknown model: Gemini takes over
+  const fallback = res.status === 429 || res.status >= 500 || res.status === 401 || res.status === 403 || res.status === 404;
+  return { ok: false, fallback, status: res.status, message };
+}
 
 // ---- model chain with cool-down -----------------------------------------------------------------
 // Each Gemini model has its own free allowance. When one is used up it rests until Google renews it

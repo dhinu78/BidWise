@@ -22,6 +22,18 @@ BIDWISE AI relay - deploy (about 10 minutes, free, no credit card)
    (optional) ALLOWED_ORIGINS       = default "https://dhinu78.github.io,http://localhost:5500"
    Deploy again.
 
+3b. OpenAI as the main model (optional; Gemini then only steps in as the backup)
+   https://platform.openai.com -> API keys -> Create new secret key.
+   Settings -> Variables and Secrets -> Add:
+   OPENAI_API_KEY   type "Secret"   = the key
+   (optional) OPENAI_MODEL          = default "gpt-5-mini"; "gpt-5" for the most careful answers
+   (optional) OPENAI_REASONING      = reasoning effort for gpt-5 models, default "low" (faster);
+                                      "medium" thinks longer before answering
+   Deploy again. BIDBOT now answers with OpenAI; one model for the whole conversation, so no
+   switching between models mid-chat. If the OpenAI credits run out, OpenAI is overloaded or
+   the key is wrong, the Gemini chain answers instead (shown in Logs as "OpenAI unavailable").
+   Each answer's model is in the response header X-Model (browser dev tools -> Network -> chat).
+
 4. Copy the Worker URL, e.g. https://bidwise-ai.<your-subdomain>.workers.dev
    Put it in docs/js/ai.js:   export const AI_RELAY_URL = "https://bidwise-ai.<your-subdomain>.workers.dev";
    The "Ask AI" button then appears for every signed-in user with an open project.

@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BIDWISE Pitch</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23022338'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='%238ac79c' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<!--
+  BIDWISE pitch deck: five slides, opens full screen on the first click or key press
+  (browsers only allow full screen after a user action).
+
+  Keys: → / ↓ / Space / PageDown next · ← / ↑ / PageUp back · 1–5 jump · F full screen · Home / End
+  Edit the team in TEAM (script at the bottom) and the demo link in DEMO_URL.
+  Slide 3 (architecture): landscape flowchart that builds itself in about 9 s (script section "flowchart").
+-->
+<style>
+  :root {
+    --navy: #022338; --navy-2: #0a3350; --navy-3: #12456a;
+    --green: #8ac79c; --green-dark: #4f9e6b; --green-pale: #a9d8b6; --mint: #3ddc84;
+    --amber: #e0b040; --panel: #e2e2e2; --white: #f4f8f6; --muted: #9fb3c2;
+    --ease: cubic-bezier(.16, 1, .3, 1); --spring: cubic-bezier(.34, 1.56, .64, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--navy); color: var(--white);
+    font-family: "Montserrat", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  html { font-size: clamp(10px, 1.05vw, 22px); }
+  button, a { font: inherit; color: inherit; }
+
+  /* ---------- living background ---------- */
+  #bg { position: fixed; inset: 0; z-index: 0; }
+  .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: .45; z-index: 0; pointer-events: none;
+    animation: drift 22s ease-in-out infinite alternate; }
+  .blob.a { width: 46vw; height: 46vw; background: radial-gradient(circle, var(--green-dark), transparent 65%); left: -12vw; top: -14vw; }
+  .blob.b { width: 40vw; height: 40vw; background: radial-gradient(circle, var(--navy-3), transparent 65%); right: -10vw; bottom: -12vw; animation-duration: 27s; animation-delay: -6s; }
+  .blob.c { width: 26vw; height: 26vw; background: radial-gradient(circle, rgba(138,199,156,.55), transparent 65%); right: 18vw; top: 8vh; animation-duration: 31s; animation-delay: -12s; opacity: .25; }
+  @keyframes drift { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6vw, 4vh) scale(1.12); } 100% { transform: translate(-4vw, 7vh) scale(.94); } }
+  .grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .spot { position: fixed; z-index: 1; width: 42vw; height: 42vw; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(138,199,156,.10), transparent 60%); transition: left .25s linear, top .25s linear; }
+  .stripe { position: fixed; top: 0; left: 0; right: 0; height: .45rem; z-index: 6;
+    background: linear-gradient(90deg, var(--navy-3) 0 52.3%, var(--green) 52.3% 100%); }
+
+  /* ---------- slides ---------- */
+  .deck { position: fixed; inset: 0; z-index: 2; perspective: 1600px; }
+  .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center;
+    padding: 6rem 7vw 5rem; visibility: hidden; pointer-events: none; }
+  .slide.active { visibility: visible; pointer-events: auto; animation: enter 1.15s var(--ease) both; }
+  .slide.leaving { visibility: visible; animation: leave .9s var(--ease) both; }
+  .slide.active.back { animation-name: enter-back; }
+  .slide.leaving.back { animation-name: leave-back; }
+  @keyframes enter { from { clip-path: circle(0% at var(--cx, 85%) var(--cy, 85%)); transform: scale(1.06); filter: blur(6px); }
+                     to { clip-path: circle(150% at var(--cx, 85%) var(--cy, 85%)); transform: none; filter: none; } }
+  @keyframes leave { to { transform: translateZ(-420px) rotateY(-14deg) translateX(-8vw); opacity: 0; filter: blur(8px); } }
+  @keyframes enter-back { from { clip-path: inset(0 100% 0 0 round 3rem); transform: translateX(-4vw); filter: blur(6px); }
+                          to { clip-path: inset(0 0 0 0 round 0); transform: none; filter: none; } }
+  @keyframes leave-back { to { transform: translateZ(-420px) rotateY(14deg) translateX(8vw); opacity: 0; filter: blur(8px); } }
+
+  /* every slide's content sits in .fit, scaled down by script when the screen is too small */
+  .fit { display: flex; flex-direction: column; justify-content: center; transform-origin: 0 50%; }
+  .slide.demo .fit { transform-origin: 50% 50%; align-items: center; }
+  .slide.fill { padding-top: 5.4rem; padding-bottom: 4.9rem; }
+  .slide.fill .fit { flex: 1; min-height: 0; justify-content: flex-start; }
+  .arch-head { display: flex; align-items: center; gap: 1.6rem; }
+  .arch-head .kicker { margin: 0; }
+  .arch-head h2 { font-size: 2.8rem; }
+
+  /* staggered entrances: every [data-a] animates when its slide becomes active */
+  [data-a] { opacity: 0; }
+  .slide.active [data-a] { animation: var(--anim, rise) 1s var(--ease) both; animation-delay: calc(var(--i, 0) * 110ms + 350ms); }
+  [data-a="zoom"] { --anim: zoom; } [data-a="left"] { --anim: from-left; } [data-a="right"] { --anim: from-right; }
+  [data-a="flip"] { --anim: flip; } [data-a="pop"] { --anim: pop; }
+  @keyframes rise { from { opacity: 0; transform: translateY(3.2rem); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes zoom { from { opacity: 0; transform: scale(.6); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes from-left { from { opacity: 0; transform: translateX(-6rem) skewX(8deg); } to { opacity: 1; transform: none; } }
+  @keyframes from-right { from { opacity: 0; transform: translateX(6rem) skewX(-8deg); } to { opacity: 1; transform: none; } }
+  @keyframes flip { from { opacity: 0; transform: perspective(900px) rotateX(70deg) translateY(2rem); } to { opacity: 1; transform: none; } }
+  @keyframes pop { 0% { opacity: 0; transform: scale(.3); } 70% { opacity: 1; transform: scale(1.08); } 100% { opacity: 1; transform: none; } }
+
+  /* letter-by-letter headings (split by script) */
+  .split .ch { display: inline-block; opacity: 0; transform: translateY(.9em) rotateX(-80deg); transform-origin: 50% 100%; }
+  .slide.active .split .ch { animation: letter .9s var(--spring) both; animation-delay: calc(var(--c) * 38ms + 250ms); }
+  @keyframes letter { to { opacity: 1; transform: none; } }
+
+  .kicker { font-size: 1.05rem; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; color: var(--green); margin: 0 0 1.2rem;
+    display: flex; align-items: center; gap: 1rem; }
+  .kicker::before { content: ""; width: 3.2rem; height: 2px; background: linear-gradient(90deg, var(--green), transparent); }
+  h1, h2 { margin: 0; font-weight: 800; letter-spacing: .01em; line-height: 1.02; }
+  h2 { font-size: 4.6rem; }
+  .lead { font-size: 1.65rem; line-height: 1.55; color: #cfe0d6; max-width: 54rem; font-weight: 400; margin: 1.6rem 0 0; }
+  .grad { background: linear-gradient(100deg, var(--white) 10%, var(--green) 45%, var(--mint) 60%, var(--white) 90%); background-size: 250% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 6s linear infinite; }
+  @keyframes shine { to { background-position: -250% 0; } }
+
+  /* ---------- splash ---------- */
+  .splash { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, var(--navy-2), var(--navy) 70%);
+    cursor: pointer; transition: clip-path 1.2s var(--ease), opacity 1.2s; clip-path: circle(150% at 50% 50%); }
+  .splash.gone { clip-path: circle(0% at 50% 50%); opacity: 0; pointer-events: none; }
+  .splash .wrap { text-align: center; }
+  /* the logo in its own colours on a light, softly glowing badge, so it stands out from the navy */
+  .logo-glow { display: inline-block; padding: 1.1rem 2rem; border-radius: 1.4rem; background: rgba(244,248,246,.96);
+    box-shadow: 0 0 0 1px rgba(138,199,156,.5), 0 0 2.5rem rgba(138,199,156,.55), 0 0 6rem rgba(61,220,132,.28);
+    opacity: 0; animation: zoom 1.4s var(--ease) .2s both, logoglow 3.2s ease-in-out 1.6s infinite; }
+  .logo-glow img { display: block; height: 4.2rem; }
+  @keyframes logoglow { 50% { box-shadow: 0 0 0 1px rgba(138,199,156,.8), 0 0 3.5rem rgba(138,199,156,.8), 0 0 8rem rgba(61,220,132,.45); } }
+  .splash .word { font-size: 9rem; font-weight: 300; letter-spacing: .14em; margin: 2.2rem 0 .4rem; }
+  .splash .word b { font-weight: 800; }
+  .splash .word .ch { display: inline-block; opacity: 0; animation: splashch 1.1s var(--spring) both; animation-delay: calc(var(--c) * 90ms + 500ms); }
+  @keyframes splashch { from { opacity: 0; transform: translateY(1.2em) scale(.6); filter: blur(12px); } to { opacity: 1; transform: none; filter: none; } }
+  .splash .sub { font-size: 1.4rem; letter-spacing: .4em; color: var(--green); text-transform: uppercase; opacity: 0; animation: rise 1s var(--ease) 1.6s both; }
+  .splash .start { margin-top: 4.5rem; display: inline-flex; align-items: center; gap: 1rem; font-size: 1.2rem; letter-spacing: .18em; text-transform: uppercase;
+    color: #cfe0d6; opacity: 0; animation: rise 1s var(--ease) 2.1s both, breathe 2.4s ease-in-out 3s infinite; }
+  .splash .start kbd { border: 1px solid rgba(138,199,156,.5); border-radius: .5rem; padding: .3rem .7rem; font: inherit; font-size: 1rem; }
+  @keyframes breathe { 50% { opacity: .45; } }
+  .splash .ring { position: absolute; width: 60vmin; height: 60vmin; border-radius: 50%; border: 1px solid rgba(138,199,156,.18);
+    animation: ripple 4.5s ease-out infinite; }
+  .splash .ring:nth-child(2) { animation-delay: 1.5s; } .splash .ring:nth-child(3) { animation-delay: 3s; }
+  @keyframes ripple { from { transform: scale(.2); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
+
+  /* ---------- chrome: progress, dots, counter ---------- */
+  .progress { position: fixed; left: 0; bottom: 0; height: .3rem; z-index: 6; width: 0; background: linear-gradient(90deg, var(--green-dark), var(--mint));
+    box-shadow: 0 0 18px var(--mint); transition: width 1s var(--ease); }
+  .dots { position: fixed; right: 2.2rem; top: 50%; transform: translateY(-50%); z-index: 6; display: flex; flex-direction: column; gap: 1.1rem; }
+  .dots button { width: .9rem; height: .9rem; border-radius: 50%; border: 2px solid rgba(138,199,156,.6); background: transparent; padding: 0; cursor: pointer;
+    position: relative; transition: transform .4s var(--spring), background .3s; }
+  .dots button.on { background: var(--green); transform: scale(1.35); box-shadow: 0 0 14px var(--green); }
+  .dots button span { position: absolute; right: 2rem; top: 50%; transform: translateY(-50%) translateX(.6rem); white-space: nowrap; font-size: .9rem;
+    letter-spacing: .12em; text-transform: uppercase; opacity: 0; transition: .35s var(--ease); pointer-events: none; color: var(--green-pale); }
+  .dots button:hover span { opacity: 1; transform: translateY(-50%); }
+  .counter { position: fixed; left: 7vw; bottom: 2.2rem; z-index: 6; font-size: 1rem; letter-spacing: .2em; color: var(--muted); display: flex; align-items: baseline; gap: .6rem; }
+  .counter b { font-size: 2rem; color: var(--green); font-weight: 800; letter-spacing: 0; display: inline-block; }
+  .counter b.tick { animation: pop .6s var(--spring); }
+  .brandmark { position: fixed; left: 7vw; top: 2.3rem; z-index: 6; display: flex; align-items: center; gap: 1.4rem; opacity: .9; }
+  .brandmark img { height: 2.2rem; filter: brightness(0) invert(1); }
+  .brandmark span { font-size: 1.05rem; letter-spacing: .24em; border-left: 1px solid rgba(255,255,255,.3); padding-left: 1.4rem; }
+  .brandmark b { font-weight: 800; }
+  .hint { position: fixed; right: 2.2rem; bottom: 2rem; z-index: 6; font-size: .85rem; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+  .hint kbd { font: inherit; border: 1px solid rgba(159,179,194,.4); border-radius: .35rem; padding: .1rem .45rem; margin: 0 .15rem; }
+
+  /* ---------- 1. team ---------- */
+  .team { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 2.4rem; margin-top: 4rem; perspective: 1200px; }
+  .member { position: relative; padding: 2.6rem 2rem 2.2rem; border-radius: 1.6rem; text-align: center; transform-style: preserve-3d;
+    background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(138,199,156,.22);
+    box-shadow: 0 2rem 4rem rgba(0,0,0,.25); transition: transform .5s var(--ease), border-color .4s; overflow: hidden; }
+  .member::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(138,199,156,.22), transparent 55%);
+    opacity: 0; transition: opacity .4s; pointer-events: none; }
+  .member:hover { border-color: rgba(138,199,156,.6); }
+  .member:hover::after { opacity: 1; }
+  .avatar { position: relative; width: 8.5rem; height: 8.5rem; margin: 0 auto 1.7rem; border-radius: 50%; display: grid; place-items: center;
+    font-size: 2.6rem; font-weight: 800; color: var(--navy); background: linear-gradient(140deg, var(--green-pale), var(--green-dark)); transform: translateZ(40px); }
+  .avatar::before { content: ""; position: absolute; inset: -.55rem; border-radius: 50%; padding: 3px;
+    background: conic-gradient(from var(--rot, 0deg), var(--mint), transparent 30%, var(--green) 60%, transparent 85%, var(--mint));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 6s linear infinite; }
+  .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  @property --rot { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  @keyframes spin { to { --rot: 360deg; } }
+  .member h3 { margin: 0; font-size: 1.75rem; font-weight: 700; transform: translateZ(30px); }
+  .member p { margin: .7rem 0 0; color: var(--green); font-size: 1.1rem; letter-spacing: .06em; transform: translateZ(20px); }
+  .member small { display: block; margin-top: .9rem; color: var(--muted); font-size: 1rem; line-height: 1.45; transform: translateZ(10px); }
+
+  /* ---------- 2. product ---------- */
+  .product { display: grid; grid-template-columns: 1.05fr 1fr; gap: 5vw; align-items: center; }
+  .title-big { font-size: 6.6rem; font-weight: 300; letter-spacing: .08em; line-height: .95; }
+  .title-big b { font-weight: 800; }
+  .title-sub { font-size: 2.2rem; letter-spacing: .14em; font-weight: 300; margin-top: .6rem; color: #cfe0d6; }
+  .title-sub b { font-weight: 700; color: var(--white); }
+  .flow { position: relative; display: flex; flex-direction: column; gap: 1.1rem; }
+  .flow svg.wire { position: absolute; left: 2.6rem; top: 2.6rem; height: calc(100% - 5.2rem); width: 4px; overflow: visible; }
+  .flow svg.wire line { stroke: var(--green); stroke-width: 3; stroke-dasharray: 6 8; stroke-dashoffset: 400; }
+  .slide.active .flow svg.wire line { animation: dash 2.4s linear .6s forwards, flowdash 1.2s linear 3s infinite; }
+  @keyframes dash { to { stroke-dashoffset: 0; } }
+  @keyframes flowdash { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -28; } }
+  .step { position: relative; display: flex; align-items: center; gap: 1.6rem; padding: 1.1rem 1.6rem 1.1rem 1.1rem; border-radius: 1.2rem;
+    background: linear-gradient(90deg, rgba(255,255,255,.07), rgba(255,255,255,.015)); border: 1px solid rgba(138,199,156,.16); }
+  .step i { flex: none; width: 3.2rem; height: 3.2rem; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 1.2rem;
+    color: var(--navy); background: var(--green); box-shadow: 0 0 0 .4rem rgba(138,199,156,.15); position: relative; z-index: 1; }
+  .slide.active .step i { animation: glow 3s ease-in-out infinite; animation-delay: calc(var(--i) * .5s + 2s); }
+  @keyframes glow { 0%, 70%, 100% { box-shadow: 0 0 0 .4rem rgba(138,199,156,.15); } 80% { box-shadow: 0 0 0 .9rem rgba(61,220,132,.35), 0 0 30px var(--mint); } }
+  .step b { display: block; font-size: 1.35rem; }
+  .step span { display: block; color: var(--muted); font-size: 1rem; margin-top: .2rem; }
+
+  /* ---------- 3. architecture: landscape flowchart that draws itself step by step ---------- */
+  #architecture { flex: 1; min-height: 0; margin-top: .9rem; border-radius: 1.6rem; border: 1px solid rgba(138,199,156,.22);
+    background: rgba(255,255,255,.03); position: relative; overflow: hidden; padding: 1rem 1.4rem; display: flex; }
+  #architecture::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(138,199,156,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(138,199,156,.05) 1px, transparent 1px);
+    background-size: 3rem 3rem; mask-image: radial-gradient(circle at 50% 50%, #000, transparent 80%); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000, transparent 80%); }
+  #flowSvg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
+  #flowSvg .nd { opacity: 0; transform-box: fill-box; transform-origin: center; }
+  #flowSvg .sh { stroke-width: 2; }
+  #flowSvg .lb { font: 700 17px "Montserrat", sans-serif; fill: #f4f8f6; }
+  #flowSvg .sb { font: 500 12.5px "Montserrat", sans-serif; fill: #9fb3c2; }
+  #flowSvg .k-data .sh { fill: #0e3a58; stroke: #9fb3c2; }
+  #flowSvg .k-proc .sh { fill: #062a43; stroke: #8ac79c; }
+  #flowSvg .k-dec .sh { fill: #3a3214; stroke: #e0b040; }
+  #flowSvg .k-ai .sh { fill: #0f3f2c; stroke: #3ddc84; }
+  #flowSvg .k-warn .sh { fill: #3a1f1c; stroke: #e07a6a; }
+  #flowSvg .k-out .sh { fill: #1b4a33; stroke: #a9d8b6; }
+  #flowSvg .k-out .lb { fill: #ffffff; }
+  #flowSvg .ed { fill: none; stroke: #6f8798; stroke-width: 2.2; opacity: 0; }
+  #flowSvg .ed.dash { stroke-dasharray: 7 6; }
+  #flowSvg .ahead { fill: #6f8798; }
+  #flowSvg .elab { font: 700 12px "Montserrat", sans-serif; fill: #9fb3c2; opacity: 0; }
+  #flowSvg .elab-bg { fill: #052d47; opacity: 0; }
+  #flowSvg .lane { font: 800 13px "Montserrat", sans-serif; letter-spacing: .32em; fill: #8ac79c; opacity: 0; }
+  #flowSvg .laneline { stroke: rgba(138,199,156,.35); stroke-width: 2; opacity: 0; }
+  #flowSvg .pulse { fill: #3ddc84; filter: drop-shadow(0 0 6px #3ddc84) drop-shadow(0 0 14px rgba(61,220,132,.7)); opacity: 0; }
+  #flowSvg.flowing .pulse { opacity: 1; transition: opacity .4s; }
+  /* the build: every part appears at its own moment (--d), lines draw from start to end */
+  .slide.active #flowSvg .nd { animation: ndIn .75s var(--spring) both; animation-delay: var(--d); }
+  .slide.active #flowSvg .ed { animation: edDraw var(--t, .55s) ease-out both; animation-delay: var(--d); }
+  .slide.active #flowSvg .ed.dash { animation: fadeIn .6s ease both; animation-delay: var(--d); }
+  .slide.active #flowSvg .elab, .slide.active #flowSvg .elab-bg, .slide.active #flowSvg .lane, .slide.active #flowSvg .laneline { animation: fadeIn .6s ease both; animation-delay: var(--d); }
+  @keyframes ndIn { from { opacity: 0; transform: scale(.55); } to { opacity: 1; transform: none; } }
+  @keyframes edDraw { 0% { opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; } 1% { opacity: 1; } 100% { opacity: 1; stroke-dasharray: 1; stroke-dashoffset: 0; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  /* after the build, the steps glow one after another, following the pulse */
+  #flowSvg.flowing .nd.main .sh { animation: stepGlow 9s linear infinite; animation-delay: var(--g); }
+  @keyframes stepGlow { 0%, 8%, 100% { filter: none; } 3% { filter: drop-shadow(0 0 10px rgba(61,220,132,.85)); } }
+
+  /* ---------- 4. BIDBOT ---------- */
+  .bot-wrap { display: grid; grid-template-columns: .9fr 1.1fr; gap: 4.5vw; align-items: center; }
+  .bot-hero { display: flex; align-items: center; gap: 2.4rem; }
+  .bot-avatar { position: relative; width: 11rem; height: 11rem; flex: none; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--green-pale), var(--green-dark));
+    display: grid; place-items: center; color: var(--navy); box-shadow: 0 0 0 1rem rgba(138,199,156,.12), 0 0 70px rgba(61,220,132,.35); animation: float 4.5s ease-in-out infinite; }
+  .bot-avatar svg { width: 64%; height: 64%; overflow: visible; }
+  .bot-avatar .eye { transform-origin: center; transform-box: fill-box; animation: blink 4s infinite; }
+  .bot-avatar .antenna { animation: beacon 1.6s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-1.1rem) rotate(-3deg); } }
+  @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.1); } }
+  @keyframes beacon { 50% { fill: var(--mint); filter: drop-shadow(0 0 6px var(--mint)); } }
+  .bot-name { font-size: 6rem; font-weight: 300; letter-spacing: .1em; line-height: .95; white-space: nowrap; }
+  .bot-name b { font-weight: 800; }
+  .features { list-style: none; margin: 2.6rem 0 0; padding: 0; display: grid; gap: 1rem; }
+  .features li { display: flex; gap: 1.1rem; align-items: flex-start; font-size: 1.3rem; line-height: 1.45; color: #dbe7e0; }
+  .features li svg { flex: none; width: 1.6rem; height: 1.6rem; margin-top: .1rem; color: var(--mint); }
+  .features b { color: var(--white); }
+  .chat { position: relative; border-radius: 1.6rem; overflow: hidden; background: #f6f8f7; color: var(--navy); box-shadow: 0 3rem 6rem rgba(0,0,0,.4), 0 0 0 1px rgba(138,199,156,.3);
+  }
+  .chat header { display: flex; align-items: center; gap: .9rem; padding: 1rem 1.3rem; background: var(--navy); color: #fff; }
+  .chat header .av { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--green); color: var(--navy); display: grid; place-items: center; }
+  .chat header .av svg { width: 1.8rem; height: 1.8rem; }
+  .chat header b { letter-spacing: .08em; font-size: 1.15rem; }
+  .chat header small { display: block; color: #cfe6d6; font-size: .85rem; letter-spacing: 0; font-weight: 400; }
+  .log { padding: 1.4rem; display: flex; flex-direction: column; justify-content: flex-end; gap: .9rem; height: 27rem; overflow: hidden; font-size: 1.02rem; line-height: 1.45; }
+  .msg { flex: none; max-width: 86%; padding: .75rem 1rem; border-radius: 1rem; opacity: 0; transform: translateY(1rem) scale(.96); transition: .55s var(--spring); }
+  .msg.show { opacity: 1; transform: none; }
+  .msg.user { align-self: flex-end; background: var(--navy); color: #fff; border-bottom-right-radius: .3rem; }
+  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid #dde4e8; border-bottom-left-radius: .3rem; }
+  .msg.card { align-self: flex-start; background: #fff; border: 1px solid #cfd8de; border-left: 4px solid var(--green-dark); }
+  .msg.card .apply { display: inline-block; margin-top: .6rem; padding: .35rem .9rem; border-radius: .5rem; background: var(--navy); color: var(--green); font-weight: 700; font-size: .9rem; }
+  .msg.card .apply.done { background: var(--green-dark); color: #fff; }
+  .typing { align-self: flex-start; display: none; gap: .3rem; padding: .8rem 1rem; background: #fff; border: 1px solid #dde4e8; border-radius: 1rem; }
+  .typing.show { display: inline-flex; }
+  .typing i { width: .5rem; height: .5rem; border-radius: 50%; background: var(--green-dark); animation: bounce 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: none; opacity: .5; } 30% { transform: translateY(-.4rem); opacity: 1; } }
+
+  /* ---------- 5. demo ---------- */
+  .demo { text-align: center; align-items: center; }
+  .demo h2 { font-size: 5.4rem; }
+  .launch { position: relative; margin-top: 3.6rem; display: inline-flex; align-items: center; gap: 1.4rem; padding: 2rem 4rem; border-radius: 99px; text-decoration: none;
+    font-size: 2rem; font-weight: 800; letter-spacing: .08em; color: var(--navy); background: linear-gradient(120deg, var(--green-pale), var(--green), var(--mint));
+    box-shadow: 0 1.5rem 4rem rgba(61,220,132,.35); transition: transform .5s var(--spring), box-shadow .4s; isolation: isolate; }
+  .launch:hover { transform: scale(1.07); box-shadow: 0 2rem 5rem rgba(61,220,132,.55); }
+  .launch::before { content: ""; position: absolute; inset: -.5rem; border-radius: 99px; z-index: -1; padding: 3px;
+    background: conic-gradient(from var(--rot), var(--mint), transparent 25%, var(--green-pale) 50%, transparent 75%, var(--mint));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 3s linear infinite; }
+  .launch .pulse { position: absolute; inset: 0; border-radius: 99px; border: 2px solid var(--mint); z-index: -2; animation: pulse 2.2s ease-out infinite; }
+  .launch .pulse:nth-of-type(2) { animation-delay: 1.1s; }
+  @keyframes pulse { from { transform: scale(1); opacity: .8; } to { transform: scale(1.5, 1.9); opacity: 0; } }
+  .launch svg { width: 2.2rem; height: 2.2rem; transition: transform .5s var(--spring); }
+  .launch:hover svg { transform: translateX(.5rem) rotate(-10deg); }
+  .url { margin-top: 2.2rem; font-size: 1.15rem; letter-spacing: .12em; color: var(--muted); }
+  .status { margin-top: 1.6rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .pill { display: inline-flex; align-items: center; gap: .6rem; padding: .55rem 1.1rem; border-radius: 99px; font-size: 1rem; background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12); color: #cfe0d6; }
+  .pill i { width: .7rem; height: .7rem; border-radius: 50%; background: var(--muted); }
+  .pill.ok i { background: var(--mint); box-shadow: 0 0 10px var(--mint); animation: breathe 1.6s ease-in-out infinite; }
+  .pill.off i { background: var(--amber); }
+  .thanks { margin-top: 3rem; font-size: 1.3rem; letter-spacing: .3em; text-transform: uppercase; color: var(--green-pale); }
+
+  /* confetti burst on launch */
+  .spark { position: fixed; z-index: 30; width: .6rem; height: .6rem; border-radius: 2px; pointer-events: none; animation: spark 1.2s var(--ease) forwards; }
+  @keyframes spark { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
+
+  @media (max-width: 900px) {
+    .product, .bot-wrap { grid-template-columns: 1fr; }
+    .dots, .hint { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="grain"></div>
+<div class="spot" id="spot"></div>
+<div class="stripe"></div>
+
+<!-- splash: the first click / key starts the deck in full screen -->
+<div class="splash" id="splash" role="button" tabindex="0" aria-label="Start the presentation">
+  <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+  <div class="wrap">
+    <span class="logo-glow"><img src="logo.png" alt="Equans Switzerland" onerror="this.parentNode.remove()"></span>
+    <div class="word" id="splashWord"><b>BID</b>WISE</div>
+    <div class="sub">Bid smarter. Win wiser.</div>
+    <div class="start">Click or press <kbd>any key</kbd> to start</div>
+  </div>
+</div>
+
+<div class="brandmark"><img src="logo.png" alt="" onerror="this.remove()"><span><b>BID</b>WISE</span></div>
+
+<main class="deck" id="deck">
+
+  <!-- 1. TEAM -->
+  <section class="slide" data-title="Team">
+    <p class="kicker" data-a="left">The team</p>
+    <h2 class="split">Who built BIDWISE</h2>
+    <div class="team" id="team"></div>
+  </section>
+
+  <!-- 2. PRODUCT -->
+  <section class="slide" data-title="Product">
+    <div class="product">
+      <div>
+        <p class="kicker" data-a="left">The product</p>
+        <div class="title-big" data-a="zoom"><b>BID</b><span class="grad">WISE</span></div>
+        <div class="title-sub" data-a style="--i:1"><b>ESTIMATION</b> TOOL</div>
+      </div>
+      <div class="flow">
+        <svg class="wire" preserveAspectRatio="none" viewBox="0 0 4 100"><line x1="2" y1="0" x2="2" y2="100" vector-effect="non-scaling-stroke"/></svg>
+        <div class="step" data-a="right" style="--i:1"><i>1</i><div><b>Read the tender</b><span>Systems, positions, quantities, units, page by page</span></div></div>
+        <div class="step" data-a="right" style="--i:2"><i>2</i><div><b>Match the catalogue</b><span>Products, supplier packages, install rules</span></div></div>
+        <div class="step" data-a="right" style="--i:3"><i>3</i><div><b>Estimate priceable components</b><span>Material, working hours and labour cost, each with a clear status</span></div></div>
+        <div class="step" data-a="right" style="--i:4"><i>4</i><div><b>Review &amp; edit</b><span>Replace matches, prices and assumptions</span></div></div>
+        <div class="step" data-a="right" style="--i:5"><i>5</i><div><b>Bid &amp; offer</b><span>Aggressive · Target · Conservative, priced tender PDF</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. ARCHITECTURE: landscape flowchart, drawn step by step when the slide opens (script section "flowchart") -->
+  <section class="slide fill" data-title="Architecture">
+    <div class="arch-head"><p class="kicker" data-a="left">Under the hood</p><h2 class="split">Architecture</h2></div>
+    <div id="architecture" data-a="zoom" style="--i:1">
+      <svg id="flowSvg" viewBox="0 0 1600 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="BIDWISE estimation flow"></svg>
+    </div>
+  </section>
+
+  <!-- 4. BIDBOT -->
+  <section class="slide" data-title="BIDBOT">
+    <div class="bot-wrap">
+      <div>
+        <p class="kicker" data-a="left">Meet the assistant</p>
+        <div class="bot-hero">
+          <div class="bot-avatar" data-a="pop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3.6v2.1"/><circle class="antenna" cx="12" cy="2.6" r="1.1" fill="currentColor" stroke="none"/>
+              <rect x="4.5" y="5.7" width="15" height="11.6" rx="3.4"/>
+              <circle class="eye" cx="9.3" cy="10.8" r="1.45" fill="currentColor" stroke="none"/><circle class="eye" cx="14.7" cy="10.8" r="1.45" fill="currentColor" stroke="none"/>
+              <path d="M9.6 14.2h4.8"/><path d="M2.6 9.8v3.6M21.4 9.8v3.6"/><path d="M8.6 17.3v2.6h6.8v-2.6"/></svg>
+          </div>
+          <div class="bot-name split"><b>BID</b><br>BOT</div>
+        </div>
+        <ul class="features">
+          <li data-a style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Plain-language answers</b> on totals, risks and next steps, with tender pages</span></li>
+          <li data-a style="--i:3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Changes on request</b>: prices, quantities, products, margins; nothing changes until you click <b>Apply</b></span></li>
+          <li data-a style="--i:4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Reads supplier quote PDFs</b>, links them to positions, compares and recommends</span></li>
+          <li data-a style="--i:5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Drafts supplier price requests</b> and recommends a bid scenario</span></li>
+          <li data-a style="--i:6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span><b>Safe by design</b>: tender topics only, key never in the browser, automatic model fallback</span></li>
+        </ul>
+      </div>
+      <div data-a="right" style="--i:2"><div class="chat">
+        <header><span class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6v2.1"/><circle cx="12" cy="2.6" r="1.1" fill="currentColor" stroke="none"/><rect x="4.5" y="5.7" width="15" height="11.6" rx="3.4"/><circle cx="9.3" cy="10.8" r="1.45" fill="currentColor" stroke="none"/><circle cx="14.7" cy="10.8" r="1.45" fill="currentColor" stroke="none"/><path d="M9.6 14.2h4.8"/><path d="M8.6 17.3v2.6h6.8v-2.6"/></svg></span>
+          <div><b>BIDBOT</b><small>Schulhaus Oberglatt · version 7</small></div></header>
+        <div class="log" id="chatLog"></div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- 5. DEMO -->
+  <section class="slide demo" data-title="Live demo">
+    <p class="kicker" data-a="zoom" style="justify-content:center">Enough slides</p>
+    <h2 class="split">Let's see it live</h2>
+    <p class="lead" data-a style="--i:1;margin-left:auto;margin-right:auto">The full tender, priced in front of you, then BIDBOT on top.</p>
+    <div data-a="pop" style="--i:3">
+      <a class="launch" id="launch" href="http://localhost:5500" target="_blank" rel="noopener">
+        <span class="pulse"></span><span class="pulse"></span>
+        Launch live demo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="url" data-a style="--i:4" id="demoUrl">localhost:5500</div>
+    <div class="status" data-a style="--i:5">
+      <span class="pill" id="stApp"><i></i>Web app</span>
+      <span class="pill" id="stPricer"><i></i>Tender pricer</span>
+    </div>
+    <div class="thanks" data-a style="--i:7">Thank you</div>
+  </section>
+</main>
+
+<nav class="dots" id="dots" aria-label="Slides"></nav>
+<div class="counter"><b id="num">01</b><span>/ 05</span></div>
+<div class="hint"><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> navigate · <kbd>F</kbd> full screen</div>
+<div class="progress" id="progress"></div>
+
+<script>
+// ---- settings ----------------------------------------------------------------------------------
+const DEMO_URL = "http://localhost:5500";
+const PRICER_HEALTH = "http://localhost:8765/health";
+const TEAM = [
+  { name: "Harshad S" },
+  { name: "Mehraj Fathima" },
+  { name: "Dhinesh Suresh" },
+  { name: "Kunaal K" },
+];
+
+// ---- helpers -------------------------------------------------------------------------------------
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// team cards
+$("#team").innerHTML = TEAM.map((m, i) => {
+  const initials = m.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  // the entrance animates the wrapper, so the card itself stays free for the mouse tilt
+  return `<div data-a="flip" style="--i:${i + 2}"><div class="member">
+    <div class="avatar">${m.photo ? `<img src="${esc(m.photo)}" alt="">` : esc(initials)}</div>
+    <h3>${esc(m.name)}</h3></div></div>`;
+}).join("");
+$$(".member").forEach((card) => {
+  card.addEventListener("pointermove", (e) => {
+    const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    card.style.transform = `rotateY(${(x - .5) * 18}deg) rotateX(${(.5 - y) * 14}deg) translateZ(10px)`;
+    card.style.setProperty("--mx", `${x * 100}%`); card.style.setProperty("--my", `${y * 100}%`);
+  });
+  card.addEventListener("pointerleave", () => { card.style.transform = ""; });
+});
+
+// split headings into letters
+function split(el) {
+  let c = 0;
+  const walk = (node) => {
+    for (const n of [...node.childNodes]) {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        for (const ch of n.textContent) {
+          if (ch === " ") { frag.append(" "); continue; }
+          const s = document.createElement("span"); s.className = "ch"; s.textContent = ch; s.style.setProperty("--c", c++); frag.append(s);
+        }
+        n.replaceWith(frag);
+      } else walk(n);
+    }
+  };
+  walk(el);
+}
+$$(".split").forEach(split);
+split($("#splashWord")); $$("#splashWord .ch").forEach((s) => { s.style.animationDelay = `calc(${s.style.getPropertyValue("--c")} * 90ms + 500ms)`; });
+
+// ---- slides --------------------------------------------------------------------------------------
+const slides = $$(".slide");
+// wrap each slide's content, then scale it down when it is taller than the space between the logo
+// and the slide counter (small laptop screens); never scaled up
+slides.forEach((s) => { const f = document.createElement("div"); f.className = "fit"; f.append(...s.childNodes); s.append(f); });
+function fit() {
+  for (const s of slides) {
+    const f = s.firstElementChild, cs = getComputedStyle(s);
+    f.style.transform = "";
+    if (s.classList.contains("fill")) continue;           // fills the screen itself (architecture)
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const k = Math.min(1, (avail - 12) / f.scrollHeight);   // 12 px to spare
+    if (k < 1) f.style.transform = `scale(${k.toFixed(3)})`;
+  }
+}
+addEventListener("resize", fit);
+document.fonts?.ready.then(fit);
+fit();
+let cur = -1, busy = false, chatRun = 0;
+$("#dots").innerHTML = slides.map((s, i) => `<button aria-label="${esc(s.dataset.title)}" data-go="${i}"><span>${esc(s.dataset.title)}</span></button>`).join("");
+$("#dots").addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b) go(+b.dataset.go, e); });
+
+function go(n, ev) {
+  n = Math.max(0, Math.min(slides.length - 1, n));
+  if (n === cur || busy) return;
+  busy = true;
+  const back = n < cur, prev = slides[cur], next = slides[n];
+  // the next slide opens from the click / the corner nearest the direction
+  const cx = ev?.clientX != null ? `${(ev.clientX / innerWidth) * 100}%` : back ? "8%" : "92%";
+  const cy = ev?.clientY != null ? `${(ev.clientY / innerHeight) * 100}%` : "88%";
+  next.style.setProperty("--cx", cx); next.style.setProperty("--cy", cy);
+  if (prev) { prev.classList.remove("active", "back"); prev.classList.add("leaving"); prev.classList.toggle("back", back);
+    setTimeout(() => prev.classList.remove("leaving", "back"), 900); }
+  next.classList.toggle("back", back);
+  void next.offsetWidth;                                   // restart the entrance animations
+  next.classList.add("active");
+  cur = n;
+  $$("#dots button").forEach((b, i) => b.classList.toggle("on", i === n));
+  const num = $("#num"); num.textContent = String(n + 1).padStart(2, "0"); num.classList.remove("tick"); void num.offsetWidth; num.classList.add("tick");
+  $("#progress").style.width = `${((n + 1) / slides.length) * 100}%`;
+  if (next.querySelector("#chatLog")) playChat();
+  if (next.classList.contains("demo")) checkStatus();
+  if (next.querySelector("#flowSvg")) startFlow();
+  setTimeout(() => { busy = false; }, 700);
+}
+
+// ---- BIDBOT conversation (plays each time the slide opens) ----------------------------------
+const CHAT = [
+  ["user", "What are the biggest risks in this bid?"],
+  ["bot", "<b>64 positions still need a supplier price</b>, mainly air-handling units and silencers. The largest is the ventilation unit for the classrooms (page 147)."],
+  ["user", "Use the Dichtatec quote for the DN 250 ring seals."],
+  ["card", "<b>✎ Proposed change</b><br>Ring seal Ø 250 mm (LV0052, page 103)<br>unit price → <b>CHF 69.00</b> <small>(Quote Dichtatec 11.10.2026)</small><br><span class='apply'>Apply change</span>"],
+  ["bot", "Applied. Prices and totals are updated. <b>Shall I draft the price request to Trox?</b>"],
+];
+async function playChat() {
+  const run = ++chatRun, log = $("#chatLog");
+  log.innerHTML = "";
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  await wait(1300);
+  for (const [who, html] of CHAT) {
+    if (run !== chatRun) return;
+    if (who !== "user") {
+      const t = document.createElement("div"); t.className = "typing show"; t.innerHTML = "<i></i><i></i><i></i>"; log.append(t);
+      await wait(1100); if (run !== chatRun) return; t.remove();
+    }
+    const m = document.createElement("div"); m.className = `msg ${who}`; m.innerHTML = html; log.append(m);
+    requestAnimationFrame(() => m.classList.add("show"));
+    if (who === "card") { await wait(1500); if (run !== chatRun) return; const a = $(".apply", m); a.textContent = "✓ Applied"; a.classList.add("done"); }
+    await wait(who === "user" ? 700 : 1400);
+  }
+}
+
+// ---- demo slide: is the app / pricer running? ----------------------------------------------
+async function reachable(url) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500);
+  try { await fetch(url, { mode: "no-cors", cache: "no-store", signal: ctl.signal }); return true; } catch { return false; } finally { clearTimeout(t); }
+}
+async function checkStatus() {
+  const set = (id, ok, label) => { const el = $(id); el.classList.toggle("ok", ok); el.classList.toggle("off", !ok); el.lastChild.textContent = label; };
+  set("#stApp", false, "Web app · checking…"); set("#stPricer", false, "Tender pricer · checking…");
+  const [app, pricer] = await Promise.all([reachable(DEMO_URL), reachable(PRICER_HEALTH)]);
+  set("#stApp", app, app ? "Web app · online" : "Web app · not started");
+  set("#stPricer", pricer, pricer ? "Tender pricer · online" : "Tender pricer · not started");
+}
+$("#launch").href = DEMO_URL;
+$("#demoUrl").textContent = DEMO_URL.replace(/^https?:\/\//, "");
+$("#launch").addEventListener("click", (e) => {
+  const r = e.currentTarget.getBoundingClientRect(), cols = ["#8ac79c", "#3ddc84", "#a9d8b6", "#ffffff", "#e0b040"];
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement("i"); s.className = "spark";
+    const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 320;
+    s.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;background:${cols[i % cols.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--r:${Math.random() * 720}deg`;
+    document.body.append(s); setTimeout(() => s.remove(), 1300);
+  }
+});
+
+// ---- navigation ----------------------------------------------------------------------------------
+const started = () => $("#splash").classList.contains("gone");
+// the deck always starts on slide 1; for a moment after starting, further clicks, keys and scrolls
+// are ignored, so a double click or a double key press can't skip the first slide
+let startedAt = 0;
+const settling = () => Date.now() - startedAt < 1200;
+function start() {
+  if (started()) return;
+  startedAt = Date.now();
+  fullscreen(true);
+  $("#splash").classList.add("gone");
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  setTimeout(() => go(0), 450);
+}
+function fullscreen(on) {
+  const el = document.documentElement;
+  if (on && !document.fullscreenElement) el.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
+  if (!on && document.fullscreenElement) document.exitFullscreen?.();
+}
+// opening the page tries full screen at once; browsers allow it only after a click or key, so the
+// splash's first click / key press enters it
+document.documentElement.requestFullscreen?.().catch(() => {});
+$("#splash").addEventListener("click", start);
+addEventListener("keydown", (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (!started()) { e.preventDefault(); return start(); }
+  if (settling()) { e.preventDefault(); return; }
+  // typing in the flowchart calculator, or Enter / Space on a flowchart shape or button, stays there
+  if (e.target.closest?.("input, textarea, select")) return;
+  if ((e.key === "Enter" || e.key === " ") && e.target.closest?.(".nd, button, a")) return;
+  const k = e.key;
+  if (["ArrowRight", "ArrowDown", "PageDown", " ", "Enter"].includes(k)) { e.preventDefault(); go(cur + 1); }
+  else if (["ArrowLeft", "ArrowUp", "PageUp", "Backspace"].includes(k)) { e.preventDefault(); go(cur - 1); }
+  else if (k === "Home") go(0);
+  else if (k === "End") go(slides.length - 1);
+  else if (/^[1-9]$/.test(k)) go(+k - 1);
+  else if (k === "f" || k === "F") fullscreen(!document.fullscreenElement);
+});
+// mouse wheel / trackpad: one slide per scroll gesture. A trackpad keeps sending events after a swipe
+// (inertia), so a new step needs a pause of 400 ms without wheel events first.
+let lastWheel = 0;
+addEventListener("wheel", (e) => {
+  const now = Date.now(), fresh = now - lastWheel > 400;
+  lastWheel = now;
+  if (!started() || settling() || !fresh || Math.abs(e.deltaY) < 4) return;
+  go(cur + (e.deltaY > 0 ? 1 : -1));
+}, { passive: true });
+let touchX = null;
+addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+addEventListener("touchend", (e) => {
+  if (touchX == null || !started() || settling()) return;
+  const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+  if (Math.abs(dx) > 60) go(cur + (dx < 0 ? 1 : -1));
+});
+addEventListener("pointermove", (e) => { const s = $("#spot"); s.style.left = `${e.clientX}px`; s.style.top = `${e.clientY}px`; });
+
+// ---- particle network background --------------------------------------------------------------
+(() => {
+  const cv = $("#bg"), cx = cv.getContext("2d"); let W, H, pts = [], mouse = { x: -1e4, y: -1e4 };
+  const resize = () => {
+    W = cv.width = innerWidth * devicePixelRatio; H = cv.height = innerHeight * devicePixelRatio;
+    cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
+    const n = Math.round(Math.min(110, (innerWidth * innerHeight) / 16000));
+    pts = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .35 * devicePixelRatio, vy: (Math.random() - .5) * .35 * devicePixelRatio, r: (Math.random() * 1.6 + .6) * devicePixelRatio }));
+  };
+  addEventListener("resize", resize); resize();
+  addEventListener("pointermove", (e) => { mouse = { x: e.clientX * devicePixelRatio, y: e.clientY * devicePixelRatio }; });
+  const link = 150 * devicePixelRatio;
+  (function frame() {
+    cx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+      const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.hypot(dx, dy);
+      if (d < 140 * devicePixelRatio) { p.x += dx / d * 1.2; p.y += dy / d * 1.2; }
+    }
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+      const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < link) { cx.strokeStyle = `rgba(138,199,156,${(1 - d / link) * .28})`; cx.lineWidth = devicePixelRatio * .8; cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke(); }
+    }
+    for (const p of pts) { cx.fillStyle = "rgba(169,216,182,.75)"; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2); cx.fill(); }
+    requestAnimationFrame(frame);
+  })();
+})();
+// ---- flowchart (slide 3): plain landscape chart, built step by step ----------------------------
+// Lane 1 "Read & understand" (top) runs left to right, then the line sweeps down to lane 2
+// "Price & deliver". --d = when a part appears (s); --g = when a main step glows in the loop.
+const flowSvg = document.getElementById("flowSvg");
+let flowTimer = null;
+(() => {
+  const N = [
+    // id, kind, shape, x, y, w, h, label, sub, appear(s), main-step glow(s)
+    ["in1", "data", "para", 48, 113, 182, 42, "Tender PDF", "", .3],
+    ["in2", "data", "para", 48, 163, 182, 42, "Catalogue", "", .45],
+    ["in3", "data", "para", 48, 213, 182, 42, "Install times", "", .6],
+    ["in4", "data", "para", 48, 263, 182, 42, "Project settings", "", .75],
+    ["upload", "proc", "rect", 290, 166, 200, 68, "Upload & check", "BIDWISE app", 1.1, 0],
+    ["ok", "dec", "dia", 530, 150, 140, 100, "Files OK?", "", 1.5, .5],
+    ["err", "warn", "rect", 500, 320, 200, 50, "Report missing file", "", 1.9],
+    ["llm", "ai", "rect", 720, 166, 210, 68, "① AI extraction", "LLM reads every page", 2.3, 1.1],
+    ["rule", "dec", "dia", 980, 150, 140, 100, "Rule fits?", "", 2.7, 1.7],
+    ["ai", "ai", "rect", 945, 34, 210, 62, "AI classifies the item", "learns new vocabulary", 3.1],
+    ["cls", "proc", "rect", 1170, 166, 220, 68, "② Classify & trace", "category · LV-ID · page", 3.6, 2.3],
+    ["cat", "dec", "dia", 116, 480, 168, 110, "In catalogue?", "", 5.0, 3.6],
+    ["px", "proc", "rect", 330, 440, 190, 50, "Catalogue price", "exact match", 5.4],
+    ["pn", "proc", "rect", 330, 510, 190, 50, "Nearest size", "≤ 30 % difference", 5.55, 4.2],
+    ["pe", "warn", "rect", 330, 580, 190, 50, "Side estimate", "with a price range", 5.7],
+    ["calc", "proc", "rect", 590, 501, 210, 68, "③ Calculate cost", "material · hours · labour", 6.2, 4.8],
+    ["set", "data", "para", 590, 630, 210, 46, "Install times + settings", "", 6.4],
+    ["out", "proc", "rect", 850, 501, 210, 68, "④ Outcome + reason", "7 clear statuses", 6.8, 5.4],
+    ["bids", "proc", "rect", 1110, 501, 210, 68, "⑤ Bid scenarios", "margin · win probability", 7.2, 6.0],
+    ["app", "out", "doc", 1370, 494, 200, 86, "BIDWISE app", "review · edit · BIDBOT · PDF", 7.6, 6.6],
+  ];
+  const E = [
+    // path, appear(s), duration(s), arrow, dashed
+    ["M228 134H248", .9, .2], ["M228 184H248", .9, .2], ["M228 234H248", .9, .2], ["M228 284H248", .9, .2], ["M248 134V284", .95, .3],
+    ["M248 200H290", 1.0, .25, 1],
+    ["M490 200H530", 1.35, .25, 1],
+    ["M600 250V320", 1.75, .3, 1],
+    ["M500 345H390V234", 2.05, .5, 1, 1],
+    ["M670 200H720", 2.15, .25, 1],
+    ["M930 200H980", 2.55, .25, 1],
+    ["M1040 154V96", 2.95, .3, 1],
+    ["M1062 96V154", 3.3, .3, 1, 1],
+    ["M1120 200H1170", 3.45, .25, 1],
+    ["M1390 200H1480V412H200V480", 3.9, 1.0, 1],
+    ["M284 535H330", 5.3, .25, 1], ["M300 535V465H330", 5.3, .3, 1], ["M300 535V605H330", 5.3, .3, 1],
+    ["M520 465H548", 5.85, .15], ["M520 605H548", 5.85, .15], ["M548 465V605", 5.9, .25], ["M520 535H590", 6.0, .25, 1],
+    ["M695 630V569", 6.55, .25, 1],
+    ["M800 535H850", 6.6, .25, 1],
+    ["M1060 535H1110", 7.0, .25, 1],
+    ["M1320 535H1370", 7.4, .25, 1],
+    ["M1470 494V456H695V501", 8.0, .6, 1, 1],
+  ];
+  const L = [   // edge labels: text, x, y, appear(s)
+    ["no", 616, 288, 1.8], ["upload again", 445, 345, 2.1], ["yes", 695, 190, 2.2], ["no", 1022, 126, 3.0], ["learned", 1100, 126, 3.35],
+    ["yes", 1145, 190, 3.5], ["edit → Re-compute → new version", 1080, 456, 8.1],
+  ];
+  const shape = (s, x, y, w, h) => {
+    if (s === "rect") return `<rect class="sh" x="${x}" y="${y}" width="${w}" height="${h}" rx="10"/>`;
+    if (s === "para") { const k = 12; return `<polygon class="sh" points="${x + k},${y} ${x + w},${y} ${x + w - k},${y + h} ${x},${y + h}"/>`; }
+    if (s === "dia") return `<polygon class="sh" points="${x + w / 2},${y} ${x + w},${y + h / 2} ${x + w / 2},${y + h} ${x},${y + h / 2}"/>`;
+    return `<path class="sh" d="M${x} ${y + 10}Q${x} ${y} ${x + 10} ${y}H${x + w - 10}Q${x + w} ${y} ${x + w} ${y + 10}V${y + h - 14}Q${x + w * .75} ${y + h - 30} ${x + w / 2} ${y + h - 14}T${x} ${y + h - 14}Z"/>`;
+  };
+  let h = `<defs><marker id="fah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahead" d="M0 0L10 5L0 10z"/></marker></defs>`;
+  // lanes
+  h += `<line class="laneline" x1="20" y1="40" x2="20" y2="330" style="--d:.1s"/><text class="lane" transform="translate(32 330) rotate(-90)" style="--d:.1s">READ &amp; UNDERSTAND</text>`;
+  h += `<line class="laneline" x1="20" y1="440" x2="20" y2="690" style="--d:4.8s"/><text class="lane" transform="translate(32 690) rotate(-90)" style="--d:4.8s">PRICE &amp; DELIVER</text>`;
+  for (const [d, at, t, arrow, dash] of E) h += `<path class="ed${dash ? " dash" : ""}" d="${d}" pathLength="1" ${arrow ? 'marker-end="url(#fah)"' : ""} style="--d:${at}s;--t:${t}s"/>`;
+  for (const [txt, x, y, at] of L) {
+    const w = txt.length * 6.6 + 12;
+    h += `<rect class="elab-bg" x="${x - w / 2}" y="${y - 11}" width="${w}" height="16" rx="4" style="--d:${at}s"/><text class="elab" x="${x}" y="${y + 1}" text-anchor="middle" style="--d:${at}s">${txt}</text>`;
+  }
+  // the pulse runs the whole route once the chart is built; drawn before the shapes, so it passes
+  // behind every box and only shows on the lines between them
+  h += `<path id="flowRoute" d="M248 200H1480V412H200V535H1370" fill="none" stroke="none"/>
+    <circle class="pulse" r="8"><animateMotion id="flowMove" dur="9s" repeatCount="indefinite" begin="indefinite" rotate="auto"><mpath href="#flowRoute"/></animateMotion></circle>`;
+  for (const [id, k, sh, x, y, w, ht, lb, sb, at, glow] of N) {
+    const cx = x + w / 2, cy = y + ht / 2 - (sh === "doc" ? 8 : 0);
+    h += `<g class="nd k-${k}${glow != null ? " main" : ""}" id="f_${id}" style="--d:${at}s;--g:${glow ?? 0}s">${shape(sh, x, y, w, ht)}
+      <text class="lb" x="${cx}" y="${sb ? cy - 3 : cy + 6}" text-anchor="middle">${lb}</text>
+      ${sb ? `<text class="sb" x="${cx}" y="${cy + 17}" text-anchor="middle">${sb}</text>` : ""}</g>`;
+  }
+  flowSvg.innerHTML = h;
+})();
+
+/** Restart the build each time the slide opens; the pulse starts once everything is drawn. */
+function startFlow() {
+  clearTimeout(flowTimer);
+  flowSvg.classList.remove("flowing");
+  const move = document.getElementById("flowMove");
+  try { move.endElement(); } catch {}
+  flowTimer = setTimeout(() => {
+    flowSvg.classList.add("flowing");
+    try { move.beginElement(); } catch {}
+  }, 8900);
+}
+</script>
+</body>
+</html>
